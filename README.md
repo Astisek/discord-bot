@@ -6,15 +6,27 @@ Release v0.9
 Command list:
 
 join
+
 leave
+
 play
+
 skip
+
 clear
-volumeChange
+
+volume
+
 pause
+
 resume
+
 seek
-queuestat
-skipid
+
+queue
+
+idskip
+
 status
+
 
