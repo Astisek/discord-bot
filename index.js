@@ -10,7 +10,6 @@ First you need to create a config.json file in data folder
 
 */
 
-
 // Libs 
 
 const Discord = require('discord.js');
