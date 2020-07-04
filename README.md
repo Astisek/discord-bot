@@ -1,11 +1,11 @@
 # discord-bot
 Discord bot for My Channels
 
-# Release v1.0
+## Release v1.0
 
 prefix: s
 
-## Command list: 
+### Command list: 
 
 ### join
 Connect the bot to the voice channel.
@@ -58,16 +58,16 @@ Shuffle the current playlist.
 ### topplay 
 Adds a track to the next position.
 
-## Default commands:
+### Default commands:
 
 ### status 
 Displays whether the bot is working.
 
 ### help
 
-### Release v0.9
+## Release v0.9
 
-Command list:
+### Command list:
 
 join
 
