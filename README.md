@@ -64,9 +64,8 @@ Adds a track to the next position.
 Displays whether the bot is working.
 
 ### help
-Lists all commands.
 
-Release v0.9
+### Release v0.9
 
 Command list:
 
