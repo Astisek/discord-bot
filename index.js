@@ -1,3 +1,14 @@
+/*
+
+First you need to create a config.json file in data folder
+
+{
+	"token": "discord bot token",
+	"prefix": "s",
+	"youtube_api_key": "youtube api token"
+}
+
+*/
 
 // Libs 
 
@@ -91,6 +102,18 @@ function move(arr, oldId, newId) { // A function that moves element 'oldId' to p
 	arr.insert(newId, movedItem);
 }
 
+async function startMusic(message) { // Function that starts playback of the 'queue' array
+	enable = true;
+
+	dispatcher = await message.guild.voice.connection.play(ytdl(queue[0].url, {audioonly: true}), {passes : 4, volume: volume});
+	dispatcher.on('finish', end => {
+		if (!songRepeat) queue.shift();
+		if (queue.length != 0) startMusic(message); else enable = false;
+	});
+
+}
+
+
 // Bot functions
 
 function join(message) {
@@ -164,16 +187,6 @@ async function play(message) {
 	}
 }
 
-async function startMusic(message) {
-	enable = true;
-
-	dispatcher = await message.guild.voice.connection.play(ytdl(queue[0].url, {audioonly: true}), {passes : 4, volume: volume});
-	dispatcher.on('finish', end => {
-		if (!songRepeat) queue.shift();
-		if (queue.length != 0) startMusic(message); else enable = false;
-	});
-
-}
 
 async function skip(message) {
 	if (enable) {
@@ -181,7 +194,7 @@ async function skip(message) {
 		if (queue.length != 0) {
 			dispatcher = await message.guild.voice.connection.play(ytdl(queue[0].url, {audioonly: true}), {passes : 4, volume: volume});
 			dispatcher.on('finish', end => {
-				queue.shift();
+				if (!songRepeat) queue.shift();
 				if (queue.length != 0) startMusic(message); else enable = false;
 			});
 		} else {
@@ -246,7 +259,7 @@ async function seek(message) {
 
 			dispatcher = await message.guild.voice.connection.play(ytdl(queue[0].url, {audioonly: true, begin: seektime}), {passes : 4, volume: volume});
 			dispatcher.on('finish', end => {
-				queue.shift();
+				if (!songRepeat) queue.shift();
 				streamTime = 0;
 				if (queue.length != 0) startMusic(message); else enable = false;
 			});
