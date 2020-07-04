@@ -31,66 +31,66 @@ status
 
 
 
-Release v1
+# Release v1.0
 
 prefix: s
 
-Command list: 
+## Command list: 
 
-join 
+### join
 Connect the bot to the voice channel.
 
-leave 
+### leave 
 Disconnects bot from voice chat.
 
-play 
+### play 
 Includes music from YouTube, you can also use search queries.
 
-skip 
+### skip 
 Skip current track.
 
-clear 
+### clear 
 Clears a playlist.
 
-volume 
+### volume 
 Changes the volume of music.
 
-pause 
+### pause 
 Pause music.
 
-resume 
+### resume 
 Continues playing music.
 
-seek 
+### seek 
 Rewinds the current track.
 Example: seek 5:00
 
-queue 
+### queue 
 Displays the current playlist.
 
-idskip 
+### idskip 
 Skips track by id from queue.
 
-repea 
+### repeat
 Enables repeating the current track.
 
-move 
+### move 
 Moves the selected track to another position.
 Example: move 5 2
 
-np 
+### np 
 Shows current track.
 
-mix 
+### mix 
 Shuffle the current playlist.
 
-topplay 
+### topplay 
 Adds a track to the next position.
 
-Default commands:
+## Default commands:
 
-status 
+### status 
 Displays whether the bot is working.
 
-help
+### help
 Lists all commands.
