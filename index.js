@@ -1,11 +1,23 @@
+
+// Libs 
+
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core');
 const searchYoutube = require('youtube-api-v3-search');
+
+
 const bot = new Discord.Client();
+Array.prototype.insert = function ( index, item ) {
+	this.splice( index, 0, item );
+};
+
+// Config File
 
 const config = require('./data/config.json');
 
 bot.login(config.token);
+
+// Bot Settings
 
 var queue = [];
 var enable = false;
@@ -13,6 +25,7 @@ var songPlaying;
 let dispatcher;
 let volume = 1;
 let streamTime = 0;
+let songRepeat = false;
 
 bot.on("ready", () => {
 	console.log("OK!");
@@ -32,15 +45,21 @@ bot.on("message", (message) => {
 	if (message.content.startsWith(config.prefix+"seek")) seek(message);
 	if (message.content.startsWith(config.prefix+"queue")) queuestat(message);
 	if (message.content.startsWith(config.prefix+"idskip")) skipid(message);
+	if (message.content.startsWith(config.prefix+"repeat")) repeat(message);
+	if (message.content.startsWith(config.prefix+"move")) moveSong(message);
+	if (message.content.startsWith(config.prefix+"np")) np(message);
+	if (message.content.startsWith(config.prefix+"mix")) mix(message);
+	if (message.content.startsWith(config.prefix+"topplay")) topplay(message);
+
+	if (message.content.startsWith(config.prefix+"help")) help(message);
 
 	if (message.content.startsWith(config.prefix+"status")) status(message);
 });
 
-// bot.on("guildMemberAdd", (member) => {
-// 	// При подключении пользователя к серверу
-// });
 
-function secToMin(min) {
+
+
+function secToMin(min) { // Function translating the number of seconds in 00:00 format
 	let sec = min % 60;
 	min = (min - sec) / 60;
 
@@ -50,7 +69,9 @@ function secToMin(min) {
 	return min+":"+sec;
 }
 
-function timeToStart() {
+
+
+function timeToStart() { // Function that calculates the time until the end of the playlist
 	let timeToStart = 0;
 
 	let timeFromStart = Math.round(streamTime + (dispatcher.streamTime / 1000));
@@ -63,16 +84,14 @@ function timeToStart() {
 	return timeToStart;
 }
 
+function move(arr, oldId, newId) { // A function that moves element 'oldId' to position 'newId' in the 'arr' array
+	let movedItem = arr[oldId];
+	arr.splice(oldId, 1);
 
+	arr.insert(newId, movedItem);
+}
 
-
-
-
-
-
-
-
-
+// Bot functions
 
 function join(message) {
 	var voiceChannel = message.member.voice.channel;
@@ -150,7 +169,7 @@ async function startMusic(message) {
 
 	dispatcher = await message.guild.voice.connection.play(ytdl(queue[0].url, {audioonly: true}), {passes : 4, volume: volume});
 	dispatcher.on('finish', end => {
-		queue.shift();
+		if (!songRepeat) queue.shift();
 		if (queue.length != 0) startMusic(message); else enable = false;
 	});
 
@@ -169,6 +188,7 @@ async function skip(message) {
 			dispatcher.end();
 		}
 		message.channel.send("Skipped!");
+		songRepeat = false;
 	}
 }
 
@@ -213,12 +233,18 @@ async function seek(message) {
 		var time = messageText.replace(config.prefix+'seek ', "");
 		if (time == config.prefix+'seek') return;
 
+
 		time = time.split(':');
+
+		if (time.length == 3) var seektime = time[0] + "h" + time[1] + "m" + time[2] + "s";
+		else if (time.length == 2) var seektime = time[0] + "m" + time[1] + "s";
+		else return;
+
 		let sumTime = (Number(time[0]) * 60 + Number(time[1]));
 
-		if (sumTime > 0) {
+		if (sumTime >= 0) {
 
-			dispatcher = await message.guild.voice.connection.play(ytdl(queue[0].url, {audioonly: true}), {passes : 4, seek: sumTime, volume: volume});
+			dispatcher = await message.guild.voice.connection.play(ytdl(queue[0].url, {audioonly: true, begin: seektime}), {passes : 4, volume: volume});
 			dispatcher.on('finish', end => {
 				queue.shift();
 				streamTime = 0;
@@ -244,9 +270,7 @@ async function queuestat(message) {
 	message.channel.send(exampleEmbed); 
 }
 
-async function status(message) {
-	message.channel.send("Work!");
-}
+
 
 async function skipid(message) {
 	if (enable) {
@@ -263,4 +287,169 @@ async function skipid(message) {
 			skip(message);
 		}
 	}
+}
+
+async function repeat(message) {
+	if (enable) {
+		if (!songRepeat) {
+			dispatcher.on('finish', end => {
+				streamTime = 0;
+				if (queue.length != 0) startMusic(message); else enable = false;
+			});
+			songRepeat = true;
+			message.channel.send(":radioactive: Repeat mode enable :radioactive: ");
+		} else {
+			dispatcher.on('finish', end => {
+				queue.shift();
+				streamTime = 0;
+				if (queue.length != 0) startMusic(message); else enable = false;
+			});
+			songRepeat = false;
+			message.channel.send(":no_entry: Repeat mode disabled :no_entry:");
+		}
+	}
+}
+
+async function moveSong(message){
+	if (enable) {
+		let messageContent = message.content;
+
+		let info = messageContent.replace(config.prefix+"move ", "");
+		if (info == config.prefix+"move") return;
+
+		info = info.split(' ');
+		if (info.length == 2) {
+			move(queue, Number(info[0])-1, Number(info[1])-1);
+			if (info[1] == 1) startMusic(message);
+		}
+		message.channel.send("Song Moved!");
+	}
+}
+
+async function np(message) {
+	if (enable) {
+		const embed = new Discord.MessageEmbed();
+		embed.setAuthor('Сэр гей', 'https://vignette.wikia.nocookie.net/baccano/images/9/90/E12_Ennis.png/revision/latest?cb=20170227231754');
+		embed.setTitle("Now Playing");
+		embed.setColor('#20B2AA');
+		embed.setDescription(queue[0].name);
+		embed.addField('\u200B', '\u200B');
+
+		let lineString = '|';
+		let currentTime = Math.round(streamTime + (dispatcher.streamTime / 1000));
+		let endTime = queue[0].lengthSec;
+
+		let currentPossition = Math.round((currentTime / endTime) * 10);
+
+		for (let i = 0; i < 10; i++) {
+			if (currentPossition == i) lineString += '|';
+			lineString += "---"
+		}
+
+		lineString += "|";
+
+		embed.addField(secToMin(currentTime), '\u200B', true);
+		embed.addField(lineString, '\u200B', true);
+		embed.addField(secToMin(endTime), '\u200B', true);
+
+		message.channel.send(embed);
+	}
+}
+
+async function mix(message) {
+	let firstElem = queue.shift();
+	if (queue.length > 0) queue.sort(() => Math.random() - 0.5);
+
+	queue.insert(0, firstElem);
+
+	message.channel.send("Playlist mixed");
+}
+
+async function topplay(message) {
+	if (enable) {
+		let url = message.content.replace(config.prefix+"topplay ", "");
+		if (url == config.prefix+"topplay") return;
+
+		if (url.startsWith('https://')) {
+
+			if (queue.length > 0) message.channel.send("Time To Start: "+secToMin(timeToStart()));
+
+
+			await ytdl.getInfo(url, (err, info) => {
+				queue.insert(1, {
+					url: url,
+					name: info.title,
+					lengthSec: info.length_seconds
+				});
+				message.channel.send("Added"+"```"+info.title+"```");
+			});
+		} else {
+			var options = {
+				q: url,
+				part: 'snippet',
+				type: 'video'
+			};
+
+			searchYoutube(config.youtube_api_key, options, async function (err, result) {
+				if (err) {
+					message.channel.send("Nothing found");
+					return;
+				} else {
+					url = result.items[0].id.videoId;
+					await ytdl.getInfo(url, (err, info) => {
+
+						if (queue.length > 0) message.channel.send("Time To Start: " + secToMin(Math.round(Number(queue[0].lengthSec) - dispatcher.streamTime / 1000)));
+
+						queue.insert(1, {
+							url: 'https://www.youtube.com/watch?v='+url,
+							name: info.title,
+							lengthSec: info.length_seconds
+						});
+						message.channel.send("Added"+"```"+info.title+"```");
+
+					});
+				}
+			});
+
+		} 
+	}
+	else {
+		play(message)
+	}
+}
+
+
+
+// Default functions 
+
+async function status(message) {
+	message.channel.send("Work!");
+}
+
+async function help(message) {
+	const exampleEmbed = new Discord.MessageEmbed()
+	.setColor('#87CEFA')
+	.setTitle('Command list')
+	.setAuthor('Сэр гей', 'https://vignette.wikia.nocookie.net/baccano/images/9/90/E12_Ennis.png/revision/latest?cb=20170227231754')
+	.addField("join", "Connect the bot to the voice channel")
+	.addField("leave", "Disconnects bot from voice chat")
+	.addField("play", "Includes music from YouTube, you can also use search queries")
+	.addField("skip", "Skip current track")
+	.addField("clear", "Clears a playlist")
+	.addField("volume", "Changes the volume of music")
+	.addField("pause", "Pause music")
+	.addField("resume", "Continues playing music")
+	.addField("seek", "Rewinds the current track \n Example: seek 5:00")
+	.addField("queue", "Displays the current playlist")
+	.addField("idskip", "Skips track by id from queue")
+	.addField("repeat", "Enables repeating the current track")
+	.addField("move", "Moves the selected track to another position \n Example: move 5 2 ")
+	.addField("np", "Shows current track")
+	.addField("mix", "Shuffle the current playlist")
+	.addField("topplay", "Adds a track to the next position")
+
+	.addField('\u200B', '\u200B')
+	.addField("status", "Displays whether the bot is working")
+
+	message.channel.send(exampleEmbed);
 }
