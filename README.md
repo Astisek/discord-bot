@@ -1,36 +1,6 @@
 # discord-bot
 Discord bot for My Channels
 
-Release v0.9
-
-Command list:
-
-join
-
-leave
-
-play
-
-skip
-
-clear
-
-volume
-
-pause
-
-resume
-
-seek
-
-queue
-
-idskip
-
-status
-
-
-
 # Release v1.0
 
 prefix: s
@@ -81,6 +51,7 @@ Example: move 5 2
 ### np 
 Shows current track.
 
+
 ### mix 
 Shuffle the current playlist.
 
@@ -94,3 +65,31 @@ Displays whether the bot is working.
 
 ### help
 Lists all commands.
+
+Release v0.9
+
+Command list:
+
+join
+
+leave
+
+play
+
+skip
+
+clear
+
+volume
+
+pause
+
+resume
+
+seek
+
+queue
+
+idskip
+
+status
