@@ -21,7 +21,9 @@
     "url": "https://github.com/Astisek/Bot-Discord/issues"
   },
   "homepage": "https://github.com/Astisek/Bot-Discord#readme",
-  "dependencies": {},
+  "dependencies": {
+    "discord.js": "^12.2.0"
+  },
   "devDependencies": {
     "discord.js": "^12.2.0",
     "ffmpeg": "0.0.4",
