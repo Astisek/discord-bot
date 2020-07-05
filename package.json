@@ -30,12 +30,5 @@
     "youtube-api-v3-search": "^1.2.1",
     "ytdl-core": "^2.1.7"
   },
-  "devDependencies": {
-    // "ffmpeg": "0.0.4",
-    // "forever": "^3.0.0",
-    // "opusscript": "0.0.7",
-    // "request": "^2.88.2",
-    // "youtube-api-v3-search": "^1.2.1",
-    // "ytdl-core": "^2.1.7"
-  }
+  "devDependencies": {}
 }
