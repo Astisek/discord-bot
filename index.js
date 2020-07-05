@@ -25,6 +25,7 @@ Array.prototype.insert = function ( index, item ) {
 // Config File
 
 //const config = require('./data/config.json');
+console.log(process.env.token);
 const config = {
 	token: process.env.token,
 	prefix: process.env.prefix,
