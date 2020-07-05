@@ -24,7 +24,14 @@ Array.prototype.insert = function ( index, item ) {
 
 // Config File
 
-const config = require('./data/config.json');
+//const config = require('./data/config.json');
+const config = {
+	token: process.env.token,
+	prefix: process.env.prefix,
+	youtube_api_key: process.env.youtube_api_key
+}
+
+
 
 bot.login(config.token);
 
@@ -96,20 +103,20 @@ function timeToStart() { // Function that calculates the time until the end of t
 }
 
 function move(arr, oldId, newId) { // A function that moves element 'oldId' to position 'newId' in the 'arr' array
-	let movedItem = arr[oldId];
-	arr.splice(oldId, 1);
+let movedItem = arr[oldId];
+arr.splice(oldId, 1);
 
-	arr.insert(newId, movedItem);
+arr.insert(newId, movedItem);
 }
 
 async function startMusic(message) { // Function that starts playback of the 'queue' array
-	enable = true;
+enable = true;
 
-	dispatcher = await message.guild.voice.connection.play(ytdl(queue[0].url, {audioonly: true}), {passes : 4, volume: volume});
-	dispatcher.on('finish', end => {
-		if (!songRepeat) queue.shift();
-		if (queue.length != 0) startMusic(message); else enable = false;
-	});
+dispatcher = await message.guild.voice.connection.play(ytdl(queue[0].url, {audioonly: true}), {passes : 4, volume: volume});
+dispatcher.on('finish', end => {
+	if (!songRepeat) queue.shift();
+	if (queue.length != 0) startMusic(message); else enable = false;
+});
 
 }
 
