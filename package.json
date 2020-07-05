@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/Astisek/Bot-Discord#readme",
   "dependencies": {
-    "discord.js": "^12.2.0"
+    "discord.js": "^12.2.0",
     "ffmpeg": "0.0.4",
     "forever": "^3.0.0",
     "opusscript": "0.0.7",
