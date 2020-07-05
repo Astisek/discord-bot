@@ -4,9 +4,9 @@
   "description": "My discord bot",
   "main": "index.js",
   "engines": {
-    "node": "12.14.1",
-    "npm": "6.13.4"
-  },
+    "node": "8.x",
+    "npm": "*"
+  },,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
