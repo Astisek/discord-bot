@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "lib": ["es6"],
+    "module": "commonjs",
+
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "outDir": "build",
+
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@data/*": ["src/data/*"],
+      "@modules/*": ["src/modules/*"],
+      "@core/*": ["src/core/*"],
+      "@utils/*": ["src/utils/*"],
+      "@commands/*": ["src/commands/*"],
+      "*": ["src/*"]
+    }
+  },
+  "lib": ["es2015"],
+  "include": ["./**/*"],
+  "ts-node": {
+    "files": true
+  },
+  "files": [
+    "src/config.d.ts"
+  ]
+}
