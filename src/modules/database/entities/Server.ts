@@ -1,3 +1,4 @@
+import { AutoPlayBuffer } from '@modules/database/entities/AutoPlayBuffer';
 import { Song } from '@modules/database/entities/Song';
 import { config } from '@utils/config';
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, UpdateDateColumn } from 'typeorm';
@@ -18,6 +19,12 @@ export class Server {
 
   @OneToMany(() => Song, (song) => song.server)
   songs: Song[];
+
+  @OneToMany(() => AutoPlayBuffer, (autoplayBuffer) => autoplayBuffer.server)
+  autoplayBuffer: AutoPlayBuffer[];
+
+  @Column('boolean', { default: false })
+  isAutoplay: boolean;
 
   @CreateDateColumn()
   created_at?: Date;

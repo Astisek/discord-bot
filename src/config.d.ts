@@ -11,6 +11,7 @@ declare global {
       DATABASE_DOMAIN: string;
       DATABASE_PORT: string;
       DATABASE_NAME: string;
+      YT_COOKIE: string;
     }
   }
 }

@@ -2,6 +2,7 @@ import { botClient } from '@modules/botClient';
 import { EmbedBuilder } from 'discord.js';
 
 export class EmbedGenerator {
+  private readonly defaultColor = '#36271f';
   private embedBuilder = new EmbedBuilder();
 
   constructor() {
@@ -25,6 +26,7 @@ export class EmbedGenerator {
       .setFooter({
         text: botClient.user?.displayName || '',
       })
+      .setColor(this.defaultColor)
       .setTimestamp();
   }
 }

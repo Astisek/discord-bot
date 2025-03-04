@@ -3,14 +3,15 @@ import { getVoiceConnection } from '@discordjs/voice';
 import { database } from '@modules/database';
 import { Server } from '@modules/database/entities/Server';
 import { Logger } from '@utils/logger';
-import { MessageCreateOptions } from 'discord.js';
+import { MessageEditOptions } from 'discord.js';
 import pino from 'pino';
 
 class Leave implements Command {
   private logger: pino.Logger;
 
-  public commandKeys = ['leave', 'l'];
-  public start = async (server: Server) => {
+  commandKeys = ['leave', 'l'];
+
+  start = async (server: Server) => {
     this.logger = new Logger('Leave', server.guildId).childLogger;
 
     const connection = getVoiceConnection(server.guildId);
@@ -25,7 +26,7 @@ class Leave implements Command {
     this.logger.debug(`Channels resets`);
   };
 
-  public successContent = async (): Promise<MessageCreateOptions> => ({
+  successContent = async (): Promise<MessageEditOptions> => ({
     content: ':jigsaw: Leaving the voice channel. See you next time!',
   });
 }

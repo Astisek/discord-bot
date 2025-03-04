@@ -1,5 +1,4 @@
 import { Server } from '@modules/database/entities/Server';
-import { SongTypeEnum } from '@modules/database/interfaces/songs';
 import {
   Column,
   CreateDateColumn,
@@ -11,33 +10,15 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Song {
+export class AutoPlayBuffer {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column('text')
-  songType: SongTypeEnum;
-
-  @Column('text')
   url: string;
 
-  @Column('text')
-  title: string;
-
-  @Column('text')
-  author: string;
-
-  @Column({ nullable: true, type: 'text' })
-  thumbnailUrl?: string;
-
-  @Column('text')
-  duration: number;
-
-  @ManyToOne(() => Server, (server) => server.songs)
+  @ManyToOne(() => Server, (server) => server.autoplayBuffer)
   server: Server;
-
-  @Column('int')
-  ordinal: number;
 
   @CreateDateColumn()
   created_at?: Date;

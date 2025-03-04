@@ -1,5 +1,3 @@
-import youtubeCookie from '../../youtube.json';
-
 class Config {
   get token(): string {
     return process.env.TOKEN;
@@ -32,7 +30,7 @@ class Config {
   }
 
   get youtubeCookie() {
-    return youtubeCookie;
+    return process.env.YT_COOKIE;
   }
 }
 export const config = new Config();

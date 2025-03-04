@@ -26,6 +26,7 @@ class Bootstrap {
     } catch (e) {
       if (e instanceof Error) {
         this.logger.error(e.message);
+        setTimeout(this.initializeDatabase, 1000);
       }
     }
   };

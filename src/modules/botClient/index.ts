@@ -1,7 +1,7 @@
 import { messageCommandSelector } from '@modules/messageCommandSelector';
 import { config } from '@utils/config';
 import { Logger } from '@utils/logger';
-import { Client, Events, GatewayIntentBits } from 'discord.js';
+import { Client, Events, GatewayIntentBits, TextChannel } from 'discord.js';
 
 class BotClient {
   private logger = new Logger('BotClient').childLogger;
@@ -14,15 +14,20 @@ class BotClient {
     GatewayIntentBits.MessageContent,
   ];
 
-  start = async () => {
-    this.client = new Client({ intents: this.intents });
-    this.subscribeListeners();
-    this.client.login(config.token);
-  };
-
   get user() {
     return this.client.user;
   }
+
+  start = async () => {
+    this.client = new Client({ intents: this.intents });
+    this.subscribeListeners();
+    await this.client.login(config.token);
+  };
+
+  getTextChannel = async (id: string) => {
+    const channel = (await this.client.channels.fetch(id)) as TextChannel;
+    return channel;
+  };
 
   private subscribeListeners = () => {
     this.subscribeOnClientReady();

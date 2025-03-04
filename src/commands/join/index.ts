@@ -1,15 +1,15 @@
 import { Command } from '@commands/command';
 import { Server } from '@modules/database/entities/Server';
 import { joinVoiceChannel } from '@discordjs/voice';
-import { GuildMember, MessageCreateOptions } from 'discord.js';
+import { GuildMember, MessageEditOptions } from 'discord.js';
 import pino from 'pino';
 import { Logger } from '@utils/logger';
 
 class Join implements Command {
+  commandKeys = ['join', 'j'];
   private logger: pino.Logger;
-  public commandKeys = ['join', 'j'];
 
-  public start = async (server: Server, _: string[], guildMember: GuildMember) => {
+  start = async (server: Server, _: string[], guildMember: GuildMember) => {
     this.logger = new Logger('Join').childLogger;
 
     joinVoiceChannel({
@@ -20,7 +20,7 @@ class Join implements Command {
     this.logger.debug('Connected to voice channel');
   };
 
-  public successContent = async (): Promise<MessageCreateOptions> => ({
+  successContent = async (): Promise<MessageEditOptions> => ({
     content: `:thumbsup:  Connected to the voice channel`,
   });
 }

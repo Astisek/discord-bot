@@ -2,6 +2,8 @@ FROM node:18.20.7
 
 WORKDIR /app
 
+RUN apt update 
+
 RUN apt install make build-essential libtool -y 
 
 RUN npm install -g @mapbox/node-pre-gyp pnpm@latest

@@ -1,3 +1,4 @@
+import { AutoPlayBuffer } from '@modules/database/entities/AutoPlayBuffer';
 import { Server } from '@modules/database/entities/Server';
 import { Song } from '@modules/database/entities/Song';
 import { config } from '@utils/config';
@@ -12,6 +13,6 @@ export const AppDataSource = new DataSource({
   database: config.database.name,
   synchronize: config.isDev,
   logging: false,
-  entities: [Server, Song],
+  entities: [Server, Song, AutoPlayBuffer],
   migrations: [],
 });
