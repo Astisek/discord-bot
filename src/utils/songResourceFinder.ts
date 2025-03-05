@@ -25,7 +25,7 @@ class SongResourceFinder {
 
     const { stream: resourceStream, type } = await demuxProbe(readableStream);
 
-    return createAudioResource(resourceStream, { inputType: type, silencePaddingFrames: 10 });
+    return createAudioResource(resourceStream, { inputType: type, silencePaddingFrames: 10, inlineVolume: true });
   };
 }
 
