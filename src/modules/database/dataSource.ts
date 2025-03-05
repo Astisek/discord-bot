@@ -14,5 +14,5 @@ export const AppDataSource = new DataSource({
   synchronize: config.isDev,
   logging: false,
   entities: [Server, Song, AutoPlayBuffer],
-  migrations: [],
+  migrations: ['migrations/*.ts'],
 });

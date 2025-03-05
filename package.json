@@ -6,7 +6,11 @@
   "scripts": {
     "build": "tsc",
     "start": "nodemon",
-    "build:start": "node -r ./tsconfig-paths-bootstrap.js build/src/core/index.js"
+    "build:start": "node -r ./tsconfig-paths-bootstrap.js build/src/core/index.js",
+
+    "typeorm-module": "node -r dotenv/config -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/modules/database/dataSource.ts",
+    "migrations:make": "npm run typeorm-module -- migration:generate migrations/migration",
+    "migrations:run": "npm run typeorm-module -- migration:run"
   },
   "keywords": [
     "discord",
