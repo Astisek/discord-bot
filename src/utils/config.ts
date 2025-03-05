@@ -17,8 +17,12 @@ class Config {
     return process.env.GUILD_ID;
   }
 
-  get isDev(): boolean {
+  get isDev() {
     return process.env.IS_DEV === 'true';
+  }
+
+  get chunkSize() {
+    return +process.env.CHUNK_SIZE;
   }
 
   get database() {

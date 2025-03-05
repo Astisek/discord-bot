@@ -12,6 +12,7 @@ declare global {
       DATABASE_PORT: string;
       DATABASE_NAME: string;
       YT_COOKIE: string;
+      CHUNK_SIZE: string;
     }
   }
 }
