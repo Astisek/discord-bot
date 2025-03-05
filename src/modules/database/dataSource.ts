@@ -4,7 +4,7 @@ import { Song } from '@modules/database/entities/Song';
 import { config } from '@utils/config';
 import { DataSource } from 'typeorm';
 
-export const AppDataSource = new DataSource({
+export const appDataSource = new DataSource({
   type: 'postgres',
   host: config.database.domain,
   port: config.database.port,
@@ -14,5 +14,5 @@ export const AppDataSource = new DataSource({
   synchronize: config.isDev,
   logging: false,
   entities: [Server, Song, AutoPlayBuffer],
-  migrations: ['migrations/*.ts'],
+  migrations: config.isDev ? ['/migrations/*.ts'] : ['/build/migrations/*.js'],
 });

@@ -1,5 +1,5 @@
 import { botClient } from '@modules/botClient';
-import { AppDataSource } from '@modules/database/dataSource';
+import { appDataSource } from '@modules/database/dataSource';
 import { Logger } from '@utils/logger';
 import { youtube } from '@utils/youtube';
 
@@ -21,12 +21,12 @@ class Bootstrap {
   };
   private initializeDatabase = async () => {
     try {
-      await AppDataSource.initialize();
+      appDataSource.initialize();
       this.logger.info('Database Connected');
     } catch (e) {
       if (e instanceof Error) {
         this.logger.error(e.message);
-        setTimeout(this.initializeDatabase, 1000);
+        setTimeout(() => this.initializeDatabase(), 1000);
       }
     }
   };

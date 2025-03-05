@@ -1,4 +1,4 @@
-import { AppDataSource } from '@modules/database/dataSource';
+import { appDataSource } from '@modules/database/dataSource';
 import { AutoPlayBuffer } from '@modules/database/entities/AutoPlayBuffer';
 import { Server } from '@modules/database/entities/Server';
 import { Song } from '@modules/database/entities/Song';
@@ -7,9 +7,9 @@ import { Logger } from '@utils/logger';
 
 class DataBase {
   private logger = new Logger('DataBase').childLogger;
-  private serverRepository = AppDataSource.getRepository(Server);
-  private songRepository = AppDataSource.getRepository(Song);
-  private autoPlayBufferRepository = AppDataSource.getRepository(AutoPlayBuffer);
+  private serverRepository = appDataSource.getRepository(Server);
+  private songRepository = appDataSource.getRepository(Song);
+  private autoPlayBufferRepository = appDataSource.getRepository(AutoPlayBuffer);
 
   findServer = async (guildId: string) => {
     const result = await this.serverRepository.findOne({
