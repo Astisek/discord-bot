@@ -4,23 +4,28 @@ import { Song } from '@modules/database/entities/Song';
 import { EmbedGenerator } from '@utils/embedGenerator';
 import { Logger } from '@utils/logger';
 import { secToTime } from '@utils/secToTime';
-import { MessageEditOptions } from 'discord.js';
+import { SGError } from '@utils/SGError';
+import { MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 
-class Queue implements Command {
-  commandKeys = ['queue', 'q'];
+export class Queue implements Command {
+  static commandKeys = ['queue', 'q'];
+  static builder = new SlashCommandBuilder().setName('queue').setDescription('Soon');
+
   private logger: pino.Logger;
   private queue: Song[];
+  private isAutoPlay = false;
 
   start = async (server: Server) => {
     this.logger = new Logger('Command-Queue', server.guildId).childLogger;
 
     if (!server.songs.length) {
       this.logger.debug('Queue empty');
-      throw new Error('Queue empty');
+      throw new SGError('Queue empty');
     }
 
     this.queue = server.songs;
+    this.isAutoPlay = server.isAutoplay;
     this.logger.debug('Queue found');
   };
   successContent = async (): Promise<MessageEditOptions> => {
@@ -30,12 +35,10 @@ class Queue implements Command {
       value: `duration: ${secToTime(duration)}`,
       inline: false,
     }));
-    embed.setStyles((builder) => builder.setTitle('Queue').addFields(fields));
+    embed.setStyles((builder) => builder.setTitle(this.isAutoPlay ? `Queue (AutoPlay)` : 'Queue').addFields(fields));
 
     return {
       embeds: [embed.embed],
     };
   };
 }
-
-export const queue = new Queue();

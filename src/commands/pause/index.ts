@@ -2,11 +2,12 @@ import { Command } from '@commands/command';
 import { Player } from '@modules/audioPlayer';
 import { Server } from '@modules/database/entities/Server';
 import { Logger } from '@utils/logger';
-import { MessageEditOptions } from 'discord.js';
+import { MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 
-class Pause implements Command {
-  commandKeys = ['pause'];
+export class Pause implements Command {
+  static commandKeys = ['pause'];
+  static builder = new SlashCommandBuilder().setName('pause').setDescription('Soon');
   private logger: pino.Logger;
 
   start = async (server: Server) => {
@@ -21,5 +22,3 @@ class Pause implements Command {
     content: `:watermelon:  **Paused!**`,
   });
 }
-
-export const pause = new Pause();

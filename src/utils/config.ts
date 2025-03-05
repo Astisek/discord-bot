@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 class Config {
   get token(): string {
     return process.env.TOKEN;

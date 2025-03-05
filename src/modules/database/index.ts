@@ -26,6 +26,7 @@ class DataBase {
     });
     await this.serverRepository.save(server);
     this.logger.debug(`Server found ${server.guildId}`);
+    server.songs = [];
     return server;
   };
 
@@ -42,6 +43,10 @@ class DataBase {
 
   clearSongs = async (server: Server) => {
     server.songs.shift();
+    if (!server.songs.length) {
+      this.logger.debug(`Queue empty`);
+      return;
+    }
     await this.songRepository.softDelete(server.songs.map(({ id }) => id));
     this.logger.debug(`Queue cleared`);
   };

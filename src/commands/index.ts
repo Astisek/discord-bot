@@ -1,15 +1,14 @@
-import { join } from '@commands/join';
-import { leave } from '@commands/leave';
-import { play } from '@commands/play';
-import { skip } from '@commands/skip';
-import { nowPlaying } from '@commands/nowPlaying';
-import { clear } from '@commands/clear';
-import { queue } from '@commands/queue';
-import { move } from '@commands/move';
-import { prefix } from '@commands/prefix';
-import { pause } from '@commands/pause';
-import { resume } from '@commands/resume';
-import { autoplay } from '@commands/autoplay';
-// import { seek } from '@commands/seek';
+import { Join } from '@commands/join';
+import { Leave } from '@commands/leave';
+import { Play } from '@commands/play';
+import { Skip } from '@commands/skip';
+import { NowPlaying } from '@commands/nowPlaying';
+import { Clear } from '@commands/clear';
+import { Queue } from '@commands/queue';
+import { Move } from '@commands/move';
+import { Prefix } from '@commands/prefix';
+import { Pause } from '@commands/pause';
+import { Resume } from '@commands/resume';
+import { Autoplay } from '@commands/autoplay';
 
-export { join, leave, play, skip, nowPlaying, clear, queue, move, prefix, pause, resume, autoplay };
+export { Join, Leave, Play, Skip, NowPlaying, Clear, Queue, Move, Prefix, Pause, Resume, Autoplay };

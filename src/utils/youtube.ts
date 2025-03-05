@@ -16,8 +16,10 @@ class Youtube {
   getStream = (url: string) =>
     this.innertube.download(url, { type: 'audio', quality: '360p', range: { start: 0, end: 1024 * 1024 * 20 } }); // 20 MB
 
-  // TODO: Форматьтировать с шортсов
   getFullUrl = (url: string) => {
+    if (url.startsWith('https://www.youtube.com/shorts/')) {
+      return `https://www.youtube.com/watch?v=${url.replace('https://www.youtube.com/shorts/', '')}`;
+    }
     if (url.startsWith('https://youtu.be/')) {
       return `https://www.youtube.com/watch?v=${url.replace('https://youtu.be/', '')}`;
     }

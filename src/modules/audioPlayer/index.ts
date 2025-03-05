@@ -8,18 +8,22 @@ import {
   getVoiceConnection,
   VoiceConnectionStatus,
 } from '@discordjs/voice';
+import { autoDisconnectControl } from '@modules/autoDisconnectControl';
 import { botClient } from '@modules/botClient';
 import { database } from '@modules/database';
 import { Server } from '@modules/database/entities/Server';
 import { Song } from '@modules/database/entities/Song';
 import { SongTypeEnum } from '@modules/database/interfaces/songs';
-import { songResourceFinder } from '@modules/songResourceFinder';
+import { songResourceFinder } from '@utils/songResourceFinder';
 import { autoPlayUtils } from '@utils/autoPlayUtils';
+import { EmbedGenerator } from '@utils/embedGenerator';
 import { Logger } from '@utils/logger';
+import { SGError } from '@utils/SGError';
 
 export class Player {
   private logger = new Logger('Player', this.server.guildId).childLogger;
   private static players = new Map<string, AudioPlayer>();
+  private readonly autoDisconnectTimeout = 1000 * 60 * 5; // 5min
 
   private player: AudioPlayer;
 
@@ -29,10 +33,10 @@ export class Player {
     const player = this.getPlayer();
     if (!player) {
       this.player = await this.createPlayer();
-      this.logger.debug(`Audio player not found but created!`);
+      this.logger.debug(`Audio player not found but created`);
     } else {
       this.player = player;
-      this.logger.debug(`Audio player found!`);
+      this.logger.debug(`Audio player found`);
     }
   };
 
@@ -75,8 +79,9 @@ export class Player {
 
   private playSong = async (song: Song) => {
     try {
+      autoDisconnectControl.deleteTimeout(this.server.guildId);
       const resource = await this.createResource(song);
-      this.logger.debug('Resource found!');
+      this.logger.debug('Resource found');
 
       this.play(resource);
     } catch (_) {
@@ -100,7 +105,7 @@ export class Player {
     try {
       const voiceConnection = getVoiceConnection(this.server.guildId);
       if (!voiceConnection) {
-        throw new Error('Voice connection not found');
+        throw new SGError('Voice connection not found');
       }
       entersState(voiceConnection, VoiceConnectionStatus.Ready, 30e3);
       const server = await database.findServer(this.server.guildId);
@@ -119,9 +124,20 @@ export class Player {
         const dbAutoPlaySong = await database.addSong(server.guildId, autoPlaySong);
         await database.addAutoplayBuffer(server.guildId, dbAutoPlaySong.url);
         this.logger.debug('Autoplay song starting...');
+        server.songs.push(dbAutoPlaySong);
+        this.sendAutoPlayMessage(server);
         return await this.playSong(dbAutoPlaySong);
       }
 
+      autoDisconnectControl.createTimeout(
+        server.guildId,
+        () => {
+          voiceConnection.disconnect();
+          this.logger.debug('Auto disconnect complete');
+        },
+        this.autoDisconnectTimeout,
+      );
+      this.logger.debug('Auto disconnect started');
       this.destroy();
     } catch (e) {
       if (e instanceof Error) {
@@ -153,7 +169,7 @@ export class Player {
   private createPlayer = async () => {
     const voiceConnection = getVoiceConnection(this.server.guildId);
     if (!voiceConnection) {
-      throw new Error('Voice connection not found');
+      throw new SGError('Voice connection not found');
     }
     const audioPlayer = createAudioPlayer();
     Player.players.set(this.server.guildId, audioPlayer);
@@ -168,5 +184,16 @@ export class Player {
     this.player.removeAllListeners();
     Player.players.delete(this.server.guildId);
     this.logger.debug(`Player destroyed`);
+  };
+
+  private sendAutoPlayMessage = async (server: Server) => {
+    if (!server.textChannel) {
+      this.logger.debug('Text channel not found');
+      throw new SGError('Text channel not found');
+    }
+    const textChannel = await botClient.getTextChannel(server.textChannel);
+    const embed = new EmbedGenerator();
+    embed.setYoutubePlay(server, this.playbackSecDuration, true);
+    textChannel.send({ embeds: [embed.embed] });
   };
 }

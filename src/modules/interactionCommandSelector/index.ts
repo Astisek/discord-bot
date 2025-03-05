@@ -4,43 +4,37 @@ import { database } from '@modules/database';
 import { Server } from '@modules/database/entities/Server';
 import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
-import { Message } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import pino from 'pino';
 
-export class MessageCommandSelector {
+export class InteractionCommandSelector {
   private logger: pino.Logger;
 
-  start = async (message: Message<true>) => {
-    this.logger = new Logger('MessageCommandSelector', message.guildId).childLogger;
-    const server = await database.findServer(message.guildId);
-    const isCommand = message.content.startsWith(server.prefix);
+  start = async (interaction: ChatInputCommandInteraction<'cached'>) => {
+    this.logger = new Logger('InteractionCommandSelector', interaction.guildId).childLogger;
+    const server = await database.findServer(interaction.guildId);
 
-    if (!isCommand) {
-      return;
-    }
     this.logger.debug('Command detected');
-    const loadingMessage = await message.channel.send({ content: '<a:loading_aaa:1344667013976428596> Loading...' });
+    const loadingMessage = await interaction.reply({ content: '<a:loading_aaa:1344667013976428596> Loading...' });
 
     try {
-      const [commandWithPrefix, ...args] = message.content.split(' ');
-      const command = commandWithPrefix.replace(server.prefix, '');
-
-      const CommandAction = availableCommands.find(({ commandKeys }) => commandKeys.includes(command));
+      const CommandAction = availableCommands.find(({ commandKeys }) => commandKeys[0] === interaction.commandName);
 
       if (!CommandAction) {
         this.logger.debug('Command not found');
         throw new SGError('Command not found!');
       }
-      if (!message.member?.voice.channelId) {
+      if (!interaction.member.voice.channelId) {
         this.logger.debug('voice.channelId not found');
         throw new SGError('Join to voice channel');
       }
 
-      await this.updateChannels(message, server);
+      await this.updateChannels(interaction, server);
 
       this.logger.debug('Command action staring...');
+      const args = interaction.options.data.map((option) => option.value?.toString() || '');
       const commandAction = new CommandAction();
-      await commandAction.start(server, args, message.member, message.attachments.first());
+      await commandAction.start(server, args, interaction.member);
       this.logger.debug('Command action complete');
 
       this.logger.debug('Try successContent...');
@@ -54,7 +48,6 @@ export class MessageCommandSelector {
       }
 
       this.logger.debug('Command complete');
-      message.delete();
     } catch (e) {
       if (e instanceof Error) {
         loadingMessage.edit({
@@ -64,7 +57,7 @@ export class MessageCommandSelector {
     }
   };
 
-  private updateChannels = async (message: Message<true>, server: Server) => {
+  private updateChannels = async (message: ChatInputCommandInteraction<'cached'>, server: Server) => {
     try {
       const player = new Player(server);
       await player.init();

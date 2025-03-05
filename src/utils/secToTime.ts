@@ -1,3 +1,5 @@
+import { SGError } from '@utils/SGError';
+
 export const secToTime = (seconds: number) => {
   const hrs = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
@@ -23,5 +25,5 @@ export const timeToSec = (time: string) => {
   } else if (parts.length === 1 && !isNaN(parts[0])) {
     return parts[0];
   }
-  throw new Error('Invalid time format');
+  throw new SGError('Invalid time format');
 };

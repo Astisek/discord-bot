@@ -3,11 +3,14 @@ import { Player } from '@modules/audioPlayer';
 import { Server } from '@modules/database/entities/Server';
 import { Logger } from '@utils/logger';
 import { timeToSec } from '@utils/secToTime';
-import { MessageEditOptions } from 'discord.js';
+import { SGError } from '@utils/SGError';
+import { MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 
-class Seek implements Command {
-  commandKeys = ['seek'];
+export class Seek implements Command {
+  static commandKeys = ['seek'];
+  static builder = new SlashCommandBuilder().setName('seek').setDescription('Soon');
+
   private logger: pino.Logger;
   private time = '';
 
@@ -15,7 +18,7 @@ class Seek implements Command {
     this.logger = new Logger('Command-Seek', server.guildId).childLogger;
     const timeString = args[0];
     if (!timeString) {
-      throw new Error('Time not found');
+      throw new SGError('Time not found');
     }
     const timeSec = timeToSec(timeString);
     this.time = timeString;
@@ -30,5 +33,3 @@ class Seek implements Command {
     content: ``,
   });
 }
-
-export const seek = new Seek();

@@ -6,6 +6,8 @@ services:
     restart: always
     networks:
       - app-network
+    volumes:
+      - discord-logs:/app/logs
 
   discord-db:
     image: postgres
@@ -37,6 +39,7 @@ services:
 volumes:
   discord-local_pgdata:
   discord-pgadmin-data:
+  discord-logs:
 
 networks:
   app-network:

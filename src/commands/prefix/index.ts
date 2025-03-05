@@ -2,11 +2,16 @@ import { Command } from '@commands/command';
 import { database } from '@modules/database';
 import { Server } from '@modules/database/entities/Server';
 import { Logger } from '@utils/logger';
-import { MessageEditOptions } from 'discord.js';
+import { SGError } from '@utils/SGError';
+import { MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 
-class Prefix implements Command {
-  commandKeys = ['prefix'];
+export class Prefix implements Command {
+  static commandKeys = ['prefix'];
+  static builder = new SlashCommandBuilder()
+    .setName('prefix')
+    .setDescription('Soon')
+    .addStringOption((option) => option.setName('prefix').setDescription('New prefix').setRequired(true));
   private logger: pino.Logger;
 
   private newPrefix = '';
@@ -17,7 +22,7 @@ class Prefix implements Command {
 
     if (!this.newPrefix) {
       this.logger.debug('New prefix not found');
-      throw new Error('Argument not found');
+      throw new SGError('Argument not found');
     }
 
     server.prefix = this.newPrefix;
@@ -29,5 +34,3 @@ class Prefix implements Command {
     content: `Prefix changed to **${this.newPrefix}**`,
   });
 }
-
-export const prefix = new Prefix();

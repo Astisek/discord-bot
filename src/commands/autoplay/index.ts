@@ -2,11 +2,12 @@ import { Command } from '@commands/command';
 import { database } from '@modules/database';
 import { Server } from '@modules/database/entities/Server';
 import { Logger } from '@utils/logger';
-import { MessageEditOptions } from 'discord.js';
+import { MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 
-class Autoplay implements Command {
-  commandKeys = ['autoplay'];
+export class Autoplay implements Command {
+  static commandKeys = ['autoplay'];
+  static builder = new SlashCommandBuilder().setName('autoplay').setDescription('Soon');
   private logger: pino.Logger;
   private autoPlay = false;
 
@@ -23,5 +24,3 @@ class Autoplay implements Command {
     content: this.autoPlay ? `:musical_note: **Autoplay enabled!**` : ':musical_note: **Autoplay disabled!**',
   });
 }
-
-export const autoplay = new Autoplay();

@@ -14,7 +14,7 @@ class Bootstrap {
 
   private initializeYoutube = async () => {
     await youtube.initialize();
-    this.logger.info('Youtube initialized!');
+    this.logger.info('Youtube initialized');
   };
   private initializeBot = () => {
     botClient.start();
@@ -22,7 +22,7 @@ class Bootstrap {
   private initializeDatabase = async () => {
     try {
       await AppDataSource.initialize();
-      this.logger.info('Database Connected!');
+      this.logger.info('Database Connected');
     } catch (e) {
       if (e instanceof Error) {
         this.logger.error(e.message);

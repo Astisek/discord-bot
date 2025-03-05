@@ -3,11 +3,17 @@ import { Player } from '@modules/audioPlayer';
 import { database } from '@modules/database';
 import { Server } from '@modules/database/entities/Server';
 import { Logger } from '@utils/logger';
-import { MessageEditOptions } from 'discord.js';
+import { SGError } from '@utils/SGError';
+import { MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 
-class Move implements Command {
-  commandKeys = ['move', 'm'];
+export class Move implements Command {
+  static commandKeys = ['move', 'm'];
+  static builder = new SlashCommandBuilder()
+    .setName('move')
+    .setDescription('Soon')
+    .addIntegerOption((option) => option.setName('prev').setDescription('Soon').setRequired(true).setMinValue(0))
+    .addIntegerOption((option) => option.setName('next').setDescription('Soon').setRequired(true).setMinValue(0));
   private logger: pino.Logger;
 
   start = async (server: Server, args: string[]) => {
@@ -18,7 +24,7 @@ class Move implements Command {
 
     if (!newOrdinal || !prevOrdinal || prevOrdinal > server.songs.length || newOrdinal > server.songs.length) {
       this.logger.debug(`Invalid ordinals: ${prevOrdinal}, ${newOrdinal} (max: ${server.songs.length})`);
-      throw new Error('Not valid ordinals');
+      throw new SGError('Not valid ordinals');
     }
 
     await database.moveSong(server.guildId, prevOrdinal, newOrdinal);
@@ -33,5 +39,3 @@ class Move implements Command {
     content: ':pie:  **Track moved!**',
   });
 }
-
-export const move = new Move();

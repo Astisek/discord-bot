@@ -3,11 +3,14 @@ import { Player } from '@modules/audioPlayer';
 import { Server } from '@modules/database/entities/Server';
 import { Song } from '@modules/database/entities/Song';
 import { Logger } from '@utils/logger';
-import { MessageEditOptions } from 'discord.js';
+import { SGError } from '@utils/SGError';
+import { MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 
-class Skip implements Command {
-  commandKeys = ['skip', 's'];
+export class Skip implements Command {
+  static commandKeys = ['skip', 's'];
+  static builder = new SlashCommandBuilder().setName('skip').setDescription('Soon');
+
   private logger: pino.Logger;
   private skippedSong: Song;
 
@@ -15,12 +18,12 @@ class Skip implements Command {
     this.logger = new Logger('Command-Skip', server.guildId).childLogger;
     if (!server.voiceChannel) {
       this.logger.debug('Not connected to voice channel');
-      throw new Error(':x: **Connect to voice channel**');
+      throw new SGError('Connect to voice channel');
     }
 
     if (!server.songs.length) {
       this.logger.debug('Queue empty');
-      throw new Error(':x: **Queue empty**');
+      throw new SGError('Queue empty');
     }
     this.skippedSong = server.songs[0];
 
@@ -36,5 +39,3 @@ class Skip implements Command {
     content: `:handshake:  **Skipped** ${this.skippedSong?.title}`,
   });
 }
-
-export const skip = new Skip();

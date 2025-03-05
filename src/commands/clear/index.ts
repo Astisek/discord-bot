@@ -2,11 +2,12 @@ import { Command } from '@commands/command';
 import { database } from '@modules/database';
 import { Server } from '@modules/database/entities/Server';
 import { Logger } from '@utils/logger';
-import { MessageEditOptions } from 'discord.js';
+import { MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 
-class Clear implements Command {
-  commandKeys = ['clear'];
+export class Clear implements Command {
+  static commandKeys = ['clear'];
+  static builder = new SlashCommandBuilder().setName('clear').setDescription('Soon');
   private logger: pino.Logger;
 
   start = async (server: Server) => {
@@ -21,5 +22,3 @@ class Clear implements Command {
     content: `:basketball:  **Queue is cleaned**`,
   });
 }
-
-export const clear = new Clear();

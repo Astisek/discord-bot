@@ -1,4 +1,5 @@
 import { createAudioResource, demuxProbe } from '@discordjs/voice';
+import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
 import internal from 'stream';
 
@@ -14,13 +15,13 @@ class SongResourceFinder {
   custom = async (url: string) => {
     const response = await fetch(url);
     const stream = response?.body;
-    if (!response.ok || !stream) throw new Error(`Failed load audio: ${response.statusText}`);
+    if (!response.ok || !stream) throw new SGError(`Failed load audio: ${response.statusText}`);
 
     return await this.createResourceFromReadableStream(stream);
   };
 
   private createResourceFromReadableStream = async (stream: ReadableStream) => {
-    const readableStream = internal.Readable.fromWeb(stream, { highWaterMark: 1, objectMode: false });
+    const readableStream = internal.Readable.fromWeb(stream, { highWaterMark: 11024 * 1024 * 5, objectMode: false });
 
     const { stream: resourceStream, type } = await demuxProbe(readableStream);
 

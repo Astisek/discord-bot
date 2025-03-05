@@ -1,12 +1,13 @@
 import { Command } from '@commands/command';
 import { Server } from '@modules/database/entities/Server';
 import { joinVoiceChannel } from '@discordjs/voice';
-import { GuildMember, MessageEditOptions } from 'discord.js';
+import { GuildMember, MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 import { Logger } from '@utils/logger';
 
-class Join implements Command {
-  commandKeys = ['join', 'j'];
+export class Join implements Command {
+  static commandKeys = ['join', 'j'];
+  static builder = new SlashCommandBuilder().setName('join').setDescription('Soon');
   private logger: pino.Logger;
 
   start = async (server: Server, _: string[], guildMember: GuildMember) => {
@@ -24,5 +25,3 @@ class Join implements Command {
     content: `:thumbsup:  Connected to the voice channel`,
   });
 }
-
-export const join = new Join();

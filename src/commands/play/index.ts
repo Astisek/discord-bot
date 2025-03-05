@@ -1,20 +1,25 @@
 import { Command } from '@commands/command';
-import { join } from '@commands/join';
+import { Join } from '@commands/join';
 import { Player } from '@modules/audioPlayer';
 import { database } from '@modules/database';
 import { Server } from '@modules/database/entities/Server';
 import { EmbedGenerator } from '@utils/embedGenerator';
 import { Logger } from '@utils/logger';
-import { secToTime } from '@utils/secToTime';
+import { SGError } from '@utils/SGError';
 import { songUtils } from '@utils/songUtils';
 import { youtube } from '@utils/youtube';
-import { Attachment, GuildMember, MessageEditOptions } from 'discord.js';
+import { Attachment, GuildMember, MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 import { PlaylistVideo } from 'youtubei.js/dist/src/parser/nodes';
 import { Playlist } from 'youtubei.js/dist/src/parser/youtube';
 
-class Play implements Command {
-  commandKeys = ['play', 'p'];
+export class Play implements Command {
+  static commandKeys = ['play', 'p'];
+  static builder = new SlashCommandBuilder()
+    .setName('play')
+    .setDescription('Soon')
+    .addStringOption((option) => option.setName('url').setDescription('url').setRequired(true));
+
   private logger: pino.Logger;
   private successEmbed: EmbedGenerator;
   private player: Player;
@@ -26,6 +31,7 @@ class Play implements Command {
   start = async (server: Server, args: string[], guildMember: GuildMember, attachment?: Attachment) => {
     this.logger = new Logger('Command-Play', server.guildId).childLogger;
 
+    const join = new Join();
     await join.start(server, args, guildMember);
     this.logger.debug(`Joined to voice channel`);
 
@@ -35,7 +41,7 @@ class Play implements Command {
 
     if (!args[0] && !attachment) {
       this.logger.debug('Arguments not found');
-      throw new Error('Arguments not found');
+      throw new SGError('Arguments not found');
     }
 
     this.argumentUrl = args[0];
@@ -70,10 +76,10 @@ class Play implements Command {
       if (this.attachment) {
         return await this.playCustom();
       }
-      throw new Error('Resource not found');
+      throw new SGError('Resource not found');
     } catch (e) {
       this.logger.debug(e);
-      throw new Error('Invalid arguments');
+      throw new SGError('Invalid arguments');
     }
   };
 
@@ -83,7 +89,7 @@ class Play implements Command {
       const playlist = await youtube.yt.getPlaylist(playlistId);
       const videos = playlist.videos as PlaylistVideo[];
 
-      this.logger.debug(`Youtube metadata found!`);
+      this.logger.debug(`Youtube metadata found`);
 
       const songs = songUtils.fromPlaylistVideos(videos, this.server, this.guildMember);
 
@@ -95,7 +101,7 @@ class Play implements Command {
       if (e instanceof Error) {
         this.logger.error(e.message);
       }
-      throw new Error(`Playlist: ${this.argumentUrl}, not found!`);
+      throw new SGError(`Playlist: ${this.argumentUrl}, not found!`);
     }
   };
 
@@ -104,19 +110,19 @@ class Play implements Command {
       const videoId = youtube.getVideoId(this.argumentUrl);
       const { basic_info } = await youtube.yt.getBasicInfo(videoId);
 
-      this.logger.debug(`Youtube metadata found!`);
+      this.logger.debug(`Youtube metadata found`);
 
       const song = songUtils.formBasicInfo(basic_info, this.server, this.guildMember);
 
       await database.addSong(this.server.guildId, song);
-      this.logger.debug(`1 songs added!`);
+      this.logger.debug(`single songs added`);
 
       await this.createSingleEmbed();
     } catch (e) {
       if (e instanceof Error) {
         this.logger.error(e.message);
       }
-      throw new Error(`Youtube video: ${this.argumentUrl}, not found!`);
+      throw new SGError(`Youtube video: ${this.argumentUrl}, not found!`);
     }
   };
 
@@ -124,76 +130,31 @@ class Play implements Command {
   private playCustom = async () => {
     if (!this.attachment) {
       this.logger.debug(`Attachment not found`);
-      throw new Error('Attachment not found');
+      throw new SGError('Attachment not found');
     }
     const song = songUtils.fromAttachment(this.attachment, this.server, this.guildMember);
 
     await database.addSong(this.server.guildId, song);
 
-    this.logger.debug(`1 custom songs added!`);
+    this.logger.debug(`single custom songs added`);
     await this.createCustomEmbed();
   };
 
   private createSingleEmbed = async () => {
     const server = await database.findServer(this.server.guildId);
-    const lastSong = server.songs.pop();
-    const firstSong = server.songs.shift();
-
-    if (!lastSong) {
-      this.logger.error('lastSong not found!');
-      throw new Error('Tracks not found');
-    }
-
-    const startThrough =
-      server.songs.reduce((result, song) => result + +song.duration, 0) +
-      ((firstSong?.duration || 0) - this.player.playbackSecDuration);
 
     this.successEmbed = new EmbedGenerator();
-    this.successEmbed.setStyles((builder) =>
-      builder
-        .setTitle(lastSong.title || 'Empty')
-        .setURL(lastSong.url)
-        .setDescription(`From Youtube\nAuthor: ${lastSong.author}`)
-        .setThumbnail(lastSong.thumbnailUrl || '')
-        .setColor('#ed0000')
-        .addFields({
-          name: `Duration: ${secToTime(+lastSong.duration)}`,
-          value: startThrough ? `Starts at ${secToTime(startThrough)}` : 'Starts now',
-          inline: false,
-        }),
-    );
+    this.successEmbed.setYoutubePlay(server, this.player.playbackSecDuration, false);
   };
 
-  // TODO: Вынести генераторы эмбедов в отдельный класс
   private createPlaylistEmbed = async (playlist: Playlist) => {
     this.successEmbed = new EmbedGenerator();
-    this.successEmbed.setStyles((builder) =>
-      builder
-        .setTitle(`Added to queue ${playlist.info.title}`)
-        .setDescription(`Playlist: ${playlist.videos.length} items`)
-        .setThumbnail(playlist.info.thumbnails[0].url)
-        .setColor('#32b0e2'),
-    );
+    this.successEmbed.setYoutubeList(playlist);
   };
 
   private createCustomEmbed = async () => {
     const server = await database.findServer(this.server.guildId);
-    const lastSong = server.songs.pop();
-
-    if (!lastSong) {
-      this.logger.error('Last track not found');
-      throw new Error('Last track not found');
-    }
-
     this.successEmbed = new EmbedGenerator();
-    this.successEmbed.setStyles((builder) =>
-      builder
-        .setTitle(lastSong.title || 'Empty')
-        .setURL(lastSong.url)
-        .setDescription(`Custom added \nAuthor: ${lastSong.author}`)
-        .setColor('#FFFFFF'),
-    );
+    this.successEmbed.setCustom(server);
   };
 }
-
-export const play = new Play();

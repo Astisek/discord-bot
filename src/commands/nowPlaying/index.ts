@@ -6,11 +6,14 @@ import { EmbedGenerator } from '@utils/embedGenerator';
 import { getPlaybackLine } from '@utils/getPlaybackLine';
 import { Logger } from '@utils/logger';
 import { secToTime } from '@utils/secToTime';
-import { MessageEditOptions } from 'discord.js';
+import { SGError } from '@utils/SGError';
+import { MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 
-class NowPlaying implements Command {
-  commandKeys = ['nowplaying', 'np'];
+export class NowPlaying implements Command {
+  static commandKeys = ['nowplaying', 'np'];
+  static builder = new SlashCommandBuilder().setName('nowplaying').setDescription('Soon');
+
   private logger: pino.Logger;
   private currentSong: Song;
   private player: Player;
@@ -21,7 +24,7 @@ class NowPlaying implements Command {
 
     if (!server.songs.length) {
       this.logger.debug('Queue empty');
-      throw new Error('Queue empty!');
+      throw new SGError('Queue empty!');
     }
 
     this.currentSong = server.songs[0];
@@ -55,5 +58,3 @@ class NowPlaying implements Command {
     };
   };
 }
-
-export const nowPlaying = new NowPlaying();
