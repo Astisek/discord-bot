@@ -3,7 +3,8 @@ import { InteractionCommandSelector } from '@modules/interactionCommandSelector'
 import { MessageCommandSelector } from '@modules/messageCommandSelector';
 import { config } from '@utils/config';
 import { Logger } from '@utils/logger';
-import { Client, Events, GatewayIntentBits, REST, Routes, TextChannel } from 'discord.js';
+import { SGError } from '@utils/SGError';
+import { Client, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
 
 class BotClient {
   private logger = new Logger('BotClient').childLogger;
@@ -27,7 +28,17 @@ class BotClient {
   };
 
   getTextChannel = async (id: string) => {
-    const channel = (await this.client.channels.fetch(id)) as TextChannel;
+    const channel = await this.client.channels.fetch(id);
+    if (!channel || !channel.isSendable()) {
+      throw new SGError(`Text channel ${id} not found`);
+    }
+    return channel;
+  };
+  getVoiceChannel = async (id: string) => {
+    const channel = await this.client.channels.fetch(id);
+    if (!channel || !channel.isVoiceBased()) {
+      throw new SGError(`Text channel ${id} not found`);
+    }
     return channel;
   };
 

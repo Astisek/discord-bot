@@ -19,19 +19,20 @@ import { autoPlayUtils } from '@utils/autoPlayUtils';
 import { EmbedGenerator } from '@utils/embedGenerator';
 import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
+import { Leave } from '@commands/leave';
 
 export class Player {
   private logger = new Logger('Player', this.server.guildId).childLogger;
   private static players = new Map<string, AudioPlayer>();
-  private readonly autoDisconnectTimeout = 1000 * 60 * 5; // 5min
+  private readonly autoDisconnectTimeout = 5000; // 5min
 
   private player: AudioPlayer;
 
   constructor(private server: Server) {}
 
-  init = async () => {
+  init = async (force?: boolean) => {
     const player = this.getPlayer();
-    if (!player) {
+    if (!player || force) {
       this.player = await this.createPlayer();
       this.logger.debug(`Audio player not found but created`);
     } else {
@@ -77,6 +78,12 @@ export class Player {
     state.playbackDuration = seek;
   };
 
+  destroy = () => {
+    this.player.removeAllListeners();
+    Player.players.delete(this.server.guildId);
+    this.logger.debug(`Player destroyed`);
+  };
+
   private playSong = async (song: Song) => {
     try {
       autoDisconnectControl.deleteTimeout(this.server.guildId);
@@ -103,12 +110,23 @@ export class Player {
 
   private startNextTrack = async () => {
     try {
-      const voiceConnection = getVoiceConnection(this.server.guildId);
+      const server = await database.findServer(this.server.guildId);
+      const voiceConnection = getVoiceConnection(server.guildId);
       if (!voiceConnection) {
+        this.logger.error('Voice connection not found on startNextTrack');
         throw new SGError('Voice connection not found');
       }
+
+      if (!server.voiceChannel) return;
+      const voiceChannel = await botClient.getVoiceChannel(server.voiceChannel);
+      if (!voiceChannel.members.size) {
+        const leave = new Leave();
+        await leave.start(this.server);
+        autoDisconnectControl.deleteTimeout(server.guildId);
+        this.logger.error('Voice channel empty - leave');
+      }
+
       entersState(voiceConnection, VoiceConnectionStatus.Ready, 30e3);
-      const server = await database.findServer(this.server.guildId);
       const lastSong = server.songs?.[0];
       const nextSong = server.songs?.[1];
       if (lastSong) {
@@ -131,8 +149,9 @@ export class Player {
 
       autoDisconnectControl.createTimeout(
         server.guildId,
-        () => {
-          voiceConnection.disconnect();
+        async () => {
+          const leave = new Leave();
+          await leave.start(server);
           this.logger.debug('Auto disconnect complete');
         },
         this.autoDisconnectTimeout,
@@ -178,12 +197,6 @@ export class Player {
     voiceConnection.configureNetworking();
     this.logger.debug(`Audio player created`);
     return audioPlayer;
-  };
-
-  private destroy = () => {
-    this.player.removeAllListeners();
-    Player.players.delete(this.server.guildId);
-    this.logger.debug(`Player destroyed`);
   };
 
   private sendAutoPlayMessage = async (server: Server) => {

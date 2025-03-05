@@ -4,6 +4,7 @@ import { joinVoiceChannel } from '@discordjs/voice';
 import { GuildMember, MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 import { Logger } from '@utils/logger';
+import { Player } from '@modules/audioPlayer';
 
 export class Join implements Command {
   static commandKeys = ['join', 'j'];
@@ -18,6 +19,9 @@ export class Join implements Command {
       guildId: server.guildId,
       adapterCreator: guildMember.guild.voiceAdapterCreator,
     });
+
+    const player = new Player(server);
+    await player.init(true);
     this.logger.debug('Connected to voice channel');
   };
 

@@ -1,5 +1,6 @@
 import { Command } from '@commands/command';
 import { getVoiceConnection } from '@discordjs/voice';
+import { Player } from '@modules/audioPlayer';
 import { database } from '@modules/database';
 import { Server } from '@modules/database/entities/Server';
 import { Logger } from '@utils/logger';
@@ -19,6 +20,10 @@ export class Leave implements Command {
 
     connection?.destroy();
     this.logger.debug(`Voice connection destroyed`);
+
+    const player = new Player(server);
+    await player.init();
+    player.destroy();
 
     server.textChannel = null;
     server.voiceChannel = null;
