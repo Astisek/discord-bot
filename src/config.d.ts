@@ -13,6 +13,7 @@ declare global {
       DATABASE_NAME: string;
       YT_COOKIE: string;
       CHUNK_SIZE: string;
+      WATER_MARK: string;
     }
   }
 }

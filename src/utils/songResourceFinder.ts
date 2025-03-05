@@ -22,7 +22,10 @@ class SongResourceFinder {
   };
 
   private createResourceFromReadableStream = async (stream: ReadableStream) => {
-    const readableStream = internal.Readable.fromWeb(stream, { highWaterMark: config.chunkSize, objectMode: false });
+    const readableStream = internal.Readable.fromWeb(stream, {
+      highWaterMark: config.waterMarkSize,
+      objectMode: false,
+    });
 
     const { stream: resourceStream, type } = await demuxProbe(readableStream);
 

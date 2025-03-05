@@ -25,6 +25,10 @@ class Config {
     return +process.env.CHUNK_SIZE;
   }
 
+  get waterMarkSize() {
+    return +process.env.WATER_MARK;
+  }
+
   get database() {
     return {
       userName: process.env.DATABASE_USERNAME,
