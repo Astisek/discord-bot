@@ -16,14 +16,13 @@ export class Leave implements Command {
     this.logger = new Logger('Leave', server.guildId).childLogger;
 
     const connection = getVoiceConnection(server.guildId);
+    const player = new Player(server);
+    await player.init();
+    player.destroy();
     this.logger.debug(`Voice connection found`);
 
     connection?.destroy();
     this.logger.debug(`Voice connection destroyed`);
-
-    const player = new Player(server);
-    await player.init();
-    player.destroy();
 
     server.textChannel = null;
     server.voiceChannel = null;
