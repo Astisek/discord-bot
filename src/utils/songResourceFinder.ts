@@ -3,6 +3,7 @@ import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
 import internal from 'stream';
+import prism from 'prism-media';
 
 class SongResourceFinder {
   private logger = new Logger('SongResourceFinder').childLogger;
@@ -23,14 +24,31 @@ class SongResourceFinder {
   };
 
   private createResourceFromReadableStream = async (stream: ReadableStream) => {
+    const transcoder = new prism.FFmpeg({
+      args: [
+        '-analyzeduration',
+        '0',
+        '-loglevel',
+        '0',
+        '-f',
+        's16le',
+        '-ar',
+        '48000',
+        '-ac',
+        '2',
+        '-reconnect',
+        '1',
+        '-reconnect_streamed',
+        '1',
+        '-reconnect_delay_max',
+        '4',
+      ],
+    });
     const readableStream = internal.Readable.fromWeb(stream, {
       highWaterMark: 1,
       objectMode: false,
     });
-    readableStream.on('close', () => this.logger.debug('Resource closed'));
-    readableStream.on('end', () => this.logger.debug('Resource end'));
-    readableStream.on('error', (e) => this.logger.debug(`Resource error ${e.message}`));
-    readableStream.on('pause', () => this.logger.debug('Resource pause'));
+    readableStream.pipe(transcoder);
 
     return createAudioResource(readableStream);
   };
