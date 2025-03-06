@@ -14,7 +14,7 @@ class Youtube {
   }
 
   getStream = (url: string) =>
-    this.innertube.download(url, { type: 'audio', quality: '360p', range: { start: 0, end: config.chunkSize } }); // 35 MB
+    this.innertube.download(url, { type: 'audio', quality: '240p', range: { start: 0, end: config.chunkSize } }); // 35 MB
 
   getFullUrl = (url: string) => {
     if (url.startsWith('https://www.youtube.com/shorts/')) {

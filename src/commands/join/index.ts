@@ -1,6 +1,6 @@
 import { Command } from '@commands/command';
 import { Server } from '@modules/database/entities/Server';
-import { joinVoiceChannel } from '@discordjs/voice';
+import { getVoiceConnection, joinVoiceChannel } from '@discordjs/voice';
 import { GuildMember, MessageEditOptions, SlashCommandBuilder } from 'discord.js';
 import pino from 'pino';
 import { Logger } from '@utils/logger';
@@ -13,6 +13,12 @@ export class Join implements Command {
 
   start = async (server: Server, _: string[], guildMember: GuildMember) => {
     this.logger = new Logger('Join').childLogger;
+
+    const voiceConnection = getVoiceConnection(server.guildId);
+    if (voiceConnection) {
+      this.logger.debug('Already connected');
+      return;
+    }
 
     joinVoiceChannel({
       channelId: server.voiceChannel || '',
