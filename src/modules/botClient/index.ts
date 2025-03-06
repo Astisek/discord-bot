@@ -1,4 +1,5 @@
 import { slashCommands } from '@data/slashCommands';
+import { generateDependencyReport } from '@discordjs/voice';
 import { InteractionCommandSelector } from '@modules/interactionCommandSelector';
 import { MessageCommandSelector } from '@modules/messageCommandSelector';
 import { config } from '@utils/config';
@@ -24,6 +25,9 @@ class BotClient {
   start = async () => {
     this.client = new Client({ intents: this.intents });
     this.subscribeListeners();
+    if (!config.isDev) {
+      this.logInfo();
+    }
     await this.client.login(config.token);
   };
 
@@ -47,6 +51,10 @@ class BotClient {
     this.subscribeOnMessage();
     this.subscribeOnInteract();
     this.registerSlashCommands();
+  };
+
+  private logInfo = () => {
+    this.logger.info(generateDependencyReport());
   };
 
   private subscribeOnClientReady = () => {

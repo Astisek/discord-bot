@@ -2,7 +2,7 @@ import { createAudioResource } from '@discordjs/voice';
 import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
-import internal from 'stream';
+import internal, { PassThrough } from 'stream';
 import prism from 'prism-media';
 
 class SongResourceFinder {
@@ -50,7 +50,11 @@ class SongResourceFinder {
       highWaterMark: 1,
       objectMode: false,
     });
-    readableStream.pipe(transcoder);
+    readableStream.pipe(transcoder).pipe(
+      new PassThrough({
+        highWaterMark: (96000 / 8) * 30,
+      }),
+    );
     readableStream.on('close', () => this.logger.debug('Resource closed'));
     readableStream.on('end', () => this.logger.debug('Resource end'));
     readableStream.on('error', (e) => this.logger.debug(`Resource error ${e.message}`));
