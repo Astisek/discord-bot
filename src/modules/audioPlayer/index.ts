@@ -92,6 +92,7 @@ export class Player {
 
       this.play(resource);
     } catch (_) {
+      this.logger.error('Format not found');
       this.startNextTrack();
     }
   };
