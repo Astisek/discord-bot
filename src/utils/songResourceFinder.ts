@@ -3,8 +3,7 @@ import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
 import { PassThrough, Readable } from 'stream';
-import { config } from '@utils/config';
-import { spawn } from 'child_process';
+import { FFmpeg } from 'prism-media';
 
 class SongResourceFinder {
   private logger = new Logger('SongResourceFinder').childLogger;
@@ -25,48 +24,40 @@ class SongResourceFinder {
   };
 
   private createResourceFromReadableStream = async (stream: ReadableStream) => {
-    const ffmpegProcess = spawn('ffmpeg', [
-      '-loglevel',
-      'error',
-      '-f',
-      's16le',
-      '-ar',
-      '48000',
-      '-ac',
-      '2',
-      '-i',
-      '-',
-      '-max_reload',
-      '10',
-      '-timeout',
-      '30000000',
-      '-f',
-      's16le',
-      '-',
-    ]);
-
-    const passThrough = new PassThrough({
-      highWaterMark: config.chunkSize * 1.5,
+    const transcoder = new FFmpeg({
+      args: [
+        '-loglevel',
+        'error',
+        '-analyzeduration',
+        '0',
+        '-loglevel',
+        '0',
+        '-f',
+        's16le',
+        '-ar',
+        '48000',
+        '-ac',
+        '2',
+        '-max_reload',
+        '10',
+        '-timeout',
+        '30000000',
+      ],
     });
-    const readableStream = Readable.fromWeb(stream, { objectMode: false });
-
-    readableStream.pipe(ffmpegProcess.stdin).on('error', (e) => this.logger.debug(`Input pipe error: ${e.message}`));
-
-    ffmpegProcess.stdout.pipe(passThrough).on('error', (e) => this.logger.debug(`Output pipe error: ${e.message}`));
-
-    ffmpegProcess.on('error', (e) => {
-      this.logger.debug(`FFmpeg process error: ${e.message}`);
+    const readableStream = Readable.fromWeb(stream, {
+      highWaterMark: 1,
+      objectMode: false,
     });
-
-    ffmpegProcess.stderr.on('data', (data) => {
-      this.logger.debug(`FFmpeg stderr: ${data.toString()}`);
-    });
-
+    readableStream.pipe(transcoder).pipe(
+      new PassThrough({
+        highWaterMark: (96000 / 8) * 30,
+      }),
+    );
     readableStream.on('close', () => this.logger.debug('Resource closed'));
     readableStream.on('end', () => this.logger.debug('Resource end'));
     readableStream.on('error', (e) => this.logger.debug(`Resource error ${e.message} ${e.stack}`));
 
-    return createAudioResource(passThrough);
+    return createAudioResource(readableStream);
   };
 }
 

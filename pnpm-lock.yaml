@@ -26,6 +26,9 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
+      ffmpeg-static:
+        specifier: ^5.2.0
+        version: 5.2.0
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
@@ -1612,7 +1615,6 @@ snapshots:
       concat-stream: 2.0.0
       http-response-object: 3.0.2
       parse-cache-control: 1.0.1
-    optional: true
 
   '@discordjs/builders@1.10.1':
     dependencies:
@@ -1839,8 +1841,7 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
-  '@types/node@10.17.60':
-    optional: true
+  '@types/node@10.17.60': {}
 
   '@types/node@22.13.8':
     dependencies:
@@ -2034,8 +2035,7 @@ snapshots:
     dependencies:
       fill-range: 7.1.1
 
-  buffer-from@1.1.2:
-    optional: true
+  buffer-from@1.1.2: {}
 
   buffer@6.0.3:
     dependencies:
@@ -2044,8 +2044,7 @@ snapshots:
 
   callsites@3.1.0: {}
 
-  caseless@0.12.0:
-    optional: true
+  caseless@0.12.0: {}
 
   chalk@4.1.2:
     dependencies:
@@ -2107,7 +2106,6 @@ snapshots:
       inherits: 2.0.4
       readable-stream: 3.6.2
       typedarray: 0.0.6
-    optional: true
 
   consola@3.4.0: {}
 
@@ -2173,8 +2171,7 @@ snapshots:
     dependencies:
       once: 1.4.0
 
-  env-paths@2.2.1:
-    optional: true
+  env-paths@2.2.1: {}
 
   escalade@3.2.0: {}
 
@@ -2298,7 +2295,6 @@ snapshots:
       progress: 2.0.3
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   file-entry-cache@8.0.0:
     dependencies:
@@ -2397,7 +2393,6 @@ snapshots:
   http-response-object@3.0.2:
     dependencies:
       '@types/node': 10.17.60
-    optional: true
 
   https-proxy-agent@5.0.1:
     dependencies:
@@ -2628,8 +2623,7 @@ snapshots:
     dependencies:
       callsites: 3.1.0
 
-  parse-cache-control@1.0.1:
-    optional: true
+  parse-cache-control@1.0.1: {}
 
   parse5-htmlparser2-tree-adapter@6.0.1:
     dependencies:
@@ -2748,8 +2742,7 @@ snapshots:
 
   process-warning@4.0.1: {}
 
-  progress@2.0.3:
-    optional: true
+  progress@2.0.3: {}
 
   pstree.remy@1.1.8: {}
 
@@ -2957,8 +2950,7 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
 
-  typedarray@0.0.6:
-    optional: true
+  typedarray@0.0.6: {}
 
   typeorm@0.3.20(pg@8.13.3)(ts-node@10.9.2(@types/node@22.13.8)(typescript@5.8.2)):
     dependencies:
