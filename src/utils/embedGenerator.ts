@@ -45,7 +45,7 @@ export class EmbedGenerator {
         .setColor(color)
         .addFields({
           name: `Duration: ${secToTime(+lastSong.duration)}`,
-          value: startThrough ? `Starts at ${secToTime(startThrough)}` : 'Starts now',
+          value: startThrough && !isAutoPlay ? `Starts at ${secToTime(startThrough)}` : 'Starts now',
           inline: false,
         }),
     );

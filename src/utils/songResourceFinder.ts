@@ -4,6 +4,7 @@ import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
 import internal, { PassThrough } from 'stream';
 import prism from 'prism-media';
+import { config } from '@utils/config';
 
 class SongResourceFinder {
   private logger = new Logger('SongResourceFinder').childLogger;
@@ -32,8 +33,6 @@ class SongResourceFinder {
         '1',
         '-reconnect_on_network_error',
         '1',
-        '-reconnect_on_http_error',
-        '4xx,5xx',
         '-reconnect_delay_max',
         '30',
         '-analyzeduration',
@@ -48,18 +47,14 @@ class SongResourceFinder {
         '2',
       ],
     });
-    const readableStream = internal.Readable.fromWeb(stream, {
-      highWaterMark: 1,
-      objectMode: false,
-    });
+    const readableStream = internal.Readable.fromWeb(stream, { objectMode: false });
     readableStream.pipe(transcoder).pipe(
       new PassThrough({
-        highWaterMark: 1,
+        highWaterMark: config.chunkSize * 1.5,
       }),
     );
-    readableStream.on('close', () => this.logger.debug('Resource closed'));
-    readableStream.on('end', () => this.logger.debug('Resource end'));
-    readableStream.on('error', (e) => this.logger.debug(`Resource error ${e.message}`));
+
+    readableStream.on('error', (e) => this.logger.debug(`Resource error ${e.message} ${e.stack}`));
 
     return createAudioResource(readableStream);
   };
