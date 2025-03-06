@@ -54,7 +54,7 @@ class SongResourceFinder {
     });
     readableStream.pipe(transcoder).pipe(
       new PassThrough({
-        highWaterMark: (96000 / 8) * 30,
+        highWaterMark: 1,
       }),
     );
     readableStream.on('close', () => this.logger.debug('Resource closed'));
