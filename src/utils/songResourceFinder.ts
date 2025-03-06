@@ -1,10 +1,10 @@
 import { createAudioResource } from '@discordjs/voice';
-import { config } from '@utils/config';
 import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
-import { spawn } from 'child_process';
 import { PassThrough, Readable } from 'stream';
+import { config } from '@utils/config';
+import { spawn } from 'child_process';
 
 class SongResourceFinder {
   private logger = new Logger('SongResourceFinder').childLogger;
@@ -50,56 +50,28 @@ class SongResourceFinder {
       '-',
     ]);
 
-    const safeStream = new PassThrough({
-      highWaterMark: config.chunkSize,
-      allowHalfOpen: true,
+    const passThrough = new PassThrough({
+      highWaterMark: config.chunkSize * 1.5,
     });
-
     const readableStream = Readable.fromWeb(stream, { objectMode: false });
 
-    readableStream
-      .on('data', (data) => {
-        // Принудительное возобновление если процесс отстает
-        if (!ffmpegProcess.stdin.write(data)) {
-          readableStream.pause();
-          ffmpegProcess.stdin.once('drain', () => readableStream.resume());
-        }
-      })
-      .on('end', () => this.logger.debug('Input stream ended'))
-      .on('error', (e) => {
-        this.logger.error(`Input error: ${e.message}`);
-        ffmpegProcess.kill('SIGTERM');
-      });
+    readableStream.pipe(ffmpegProcess.stdin).on('error', (e) => this.logger.debug(`Input pipe error: ${e.message}`));
 
-    // Обработчики для FFmpeg процесса
-    ffmpegProcess.stdin.on('error', (e) => {
-      // @ts-ignore
-      if (e.code !== 'EPIPE') this.logger.error(`FFmpeg stdin error: ${e}`);
+    ffmpegProcess.stdout.pipe(passThrough).on('error', (e) => this.logger.debug(`Output pipe error: ${e.message}`));
+
+    ffmpegProcess.on('error', (e) => {
+      this.logger.debug(`FFmpeg process error: ${e.message}`);
     });
 
-    ffmpegProcess.stdout
-      .on('data', (data) => safeStream.write(data))
-      .on('end', () => safeStream.end())
-      .on('error', (e) => safeStream.destroy(e));
-
-    ffmpegProcess.on('exit', (code, signal) => {
-      this.logger.debug(`FFmpeg exited (${code}, ${signal})`);
-      safeStream.end();
+    ffmpegProcess.stderr.on('data', (data) => {
+      this.logger.debug(`FFmpeg stderr: ${data.toString()}`);
     });
 
-    // Механизм heartbeat для детектирования "зависаний"
-    let lastData = Date.now();
-    safeStream.on('data', () => (lastData = Date.now()));
+    readableStream.on('close', () => this.logger.debug('Resource closed'));
+    readableStream.on('end', () => this.logger.debug('Resource end'));
+    readableStream.on('error', (e) => this.logger.debug(`Resource error ${e.message} ${e.stack}`));
 
-    const heartbeat = setInterval(() => {
-      if (Date.now() - lastData > 30000) {
-        this.logger.error('No data for 30s, restarting');
-        ffmpegProcess.kill('SIGKILL');
-        clearInterval(heartbeat);
-      }
-    }, 5000);
-
-    return createAudioResource(safeStream);
+    return createAudioResource(passThrough);
   };
 }
 
