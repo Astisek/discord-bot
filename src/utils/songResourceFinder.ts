@@ -1,10 +1,12 @@
 import { createAudioResource } from '@discordjs/voice';
+import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
 import internal from 'stream';
 
-// TODO: В utils
 class SongResourceFinder {
+  private logger = new Logger('SongResourceFinder').childLogger;
+
   youTube = async (url: string) => {
     const videoId = youtube.getVideoId(url);
     const stream = await youtube.getStream(videoId);
@@ -25,6 +27,10 @@ class SongResourceFinder {
       highWaterMark: 1,
       objectMode: false,
     });
+    readableStream.on('close', () => this.logger.debug('Resource closed'));
+    readableStream.on('end', () => this.logger.debug('Resource end'));
+    readableStream.on('error', (e) => this.logger.debug(`Resource error ${e.message}`));
+    readableStream.on('pause', () => this.logger.debug('Resource pause'));
 
     return createAudioResource(readableStream);
   };
