@@ -36,8 +36,6 @@ class SongResourceFinder {
       '2',
       '-i',
       '-',
-      '-thread_queue_size',
-      '1024',
       '-max_reload',
       '10',
       '-timeout',
