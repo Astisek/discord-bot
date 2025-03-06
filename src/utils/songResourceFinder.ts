@@ -26,6 +26,14 @@ class SongResourceFinder {
   private createResourceFromReadableStream = async (stream: ReadableStream) => {
     const transcoder = new prism.FFmpeg({
       args: [
+        '-reconnect',
+        '1',
+        '-reconnect_streamed',
+        '1',
+        '-reconnect_at_eof',
+        '1',
+        '-reconnect_delay_max',
+        '10',
         '-analyzeduration',
         '0',
         '-loglevel',
@@ -36,12 +44,6 @@ class SongResourceFinder {
         '48000',
         '-ac',
         '2',
-        '-reconnect',
-        '1',
-        '-reconnect_streamed',
-        '1',
-        '-reconnect_delay_max',
-        '4',
       ],
     });
     const readableStream = internal.Readable.fromWeb(stream, {
@@ -49,6 +51,9 @@ class SongResourceFinder {
       objectMode: false,
     });
     readableStream.pipe(transcoder);
+    readableStream.on('close', () => this.logger.debug('Resource closed'));
+    readableStream.on('end', () => this.logger.debug('Resource end'));
+    readableStream.on('error', (e) => this.logger.debug(`Resource error ${e.message}`));
 
     return createAudioResource(readableStream);
   };
