@@ -1,5 +1,4 @@
-import { createAudioResource, demuxProbe } from '@discordjs/voice';
-import { config } from '@utils/config';
+import { createAudioResource } from '@discordjs/voice';
 import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
 import internal from 'stream';
@@ -23,13 +22,11 @@ class SongResourceFinder {
 
   private createResourceFromReadableStream = async (stream: ReadableStream) => {
     const readableStream = internal.Readable.fromWeb(stream, {
-      highWaterMark: config.waterMarkSize,
+      highWaterMark: 1,
       objectMode: false,
     });
 
-    const { stream: resourceStream, type } = await demuxProbe(readableStream);
-
-    return createAudioResource(resourceStream, { inputType: type, inlineVolume: true });
+    return createAudioResource(readableStream);
   };
 }
 
