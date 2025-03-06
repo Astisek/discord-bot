@@ -57,6 +57,13 @@ class SongResourceFinder {
     inputStream.pipe(ffmpegProcess.stdin);
     ffmpegProcess.stdout.pipe(outputStream);
 
+    ffmpegProcess.stderr.on('data', (data) => {
+      console.error(`FFmpeg stderr: ${data.toString()}`);
+    });
+    ffmpegProcess.on('exit', (code, signal) => {
+      console.error(`FFmpeg exited with code ${code} and signal ${signal}`);
+    });
+
     outputStream.on('error', (e) => this.logger.debug(`Resource error ${e.message} ${e.stack}`));
 
     return createAudioResource(outputStream);
