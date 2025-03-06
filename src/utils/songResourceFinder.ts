@@ -2,10 +2,9 @@ import { createAudioResource } from '@discordjs/voice';
 import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
-import internal, { PassThrough } from 'stream';
+import { PassThrough, Readable } from 'stream';
 import { config } from '@utils/config';
 import { spawn } from 'child_process';
-import ffmpegPath from 'ffmpeg-static';
 
 class SongResourceFinder {
   private logger = new Logger('SongResourceFinder').childLogger;
@@ -26,47 +25,44 @@ class SongResourceFinder {
   };
 
   private createResourceFromReadableStream = async (stream: ReadableStream) => {
-    const ffmpegProcess = spawn(ffmpegPath || '', [
-      '-reconnect',
-      '1',
-      '-reconnect_streamed',
-      '1',
-      '-reconnect_on_network_error',
-      '1',
-      '-reconnect_on_http_error',
-      '4xx,5xx',
-      '-reconnect_delay_max',
-      '30',
-      '-analyzeduration',
-      '0',
+    const ffmpegProcess = spawn('ffmpeg', [
       '-loglevel',
       'error',
-      '-i',
-      'pipe:0',
       '-f',
       's16le',
       '-ar',
       '48000',
       '-ac',
       '2',
-      'pipe:1',
+      '-i',
+      '-',
+      '-c:a',
+      'pcm_s16le',
+      '-f',
+      's16le',
+      '-',
     ]);
-    const inputStream = internal.Readable.fromWeb(stream, { objectMode: false });
-    const outputStream = new PassThrough({ highWaterMark: config.chunkSize * 1.5 });
 
-    inputStream.pipe(ffmpegProcess.stdin);
-    ffmpegProcess.stdout.pipe(outputStream);
+    // Создаем PassThrough поток
+    const passThrough = new PassThrough({
+      highWaterMark: config.chunkSize * 1.5,
+    });
+    const readableStream = Readable.fromWeb(stream, { objectMode: false });
+
+    // Соединяем потоки
+    readableStream.pipe(ffmpegProcess.stdin).on('error', (e) => this.logger.debug(`Input pipe error: ${e.message}`));
+
+    ffmpegProcess.stdout.pipe(passThrough).on('error', (e) => this.logger.debug(`Output pipe error: ${e.message}`));
+
+    ffmpegProcess.on('error', (e) => {
+      this.logger.debug(`FFmpeg process error: ${e.message}`);
+    });
 
     ffmpegProcess.stderr.on('data', (data) => {
-      console.error(`FFmpeg stderr: ${data.toString()}`);
-    });
-    ffmpegProcess.on('exit', (code, signal) => {
-      console.error(`FFmpeg exited with code ${code} and signal ${signal}`);
+      this.logger.debug(`FFmpeg stderr: ${data.toString()}`);
     });
 
-    outputStream.on('error', (e) => this.logger.debug(`Resource error ${e.message} ${e.stack}`));
-
-    return createAudioResource(outputStream);
+    return createAudioResource(passThrough);
   };
 }
 

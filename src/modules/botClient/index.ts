@@ -6,7 +6,6 @@ import { config } from '@utils/config';
 import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
 import { Client, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
-import ffmpegPath from 'ffmpeg-static';
 
 class BotClient {
   private logger = new Logger('BotClient').childLogger;
@@ -55,7 +54,6 @@ class BotClient {
   };
 
   private logInfo = () => {
-    this.logger.info(ffmpegPath);
     this.logger.info(generateDependencyReport());
   };
 
