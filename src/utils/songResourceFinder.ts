@@ -24,7 +24,7 @@ class SongResourceFinder {
   };
 
   private createResourceFromReadableStream = async (stream: ReadableStream) => {
-    const readableStream = Readable.fromWeb(stream);
+    const readableStream = Readable.fromWeb(stream, { highWaterMark: config.chunkSize * 0.5 });
     const passThrough = new PassThrough({
       highWaterMark: config.chunkSize * 0.5,
       allowHalfOpen: true,
@@ -34,7 +34,7 @@ class SongResourceFinder {
 
     readableStream.pipe(passThrough);
 
-    readableStream.on('error', (e) => this.logger.error(`${e.message} ${e.stack}`));
+    passThrough.on('error', (e) => this.logger.error(`${e.message} ${e.stack}`));
 
     return createAudioResource(passThrough, { inputType: StreamType.Arbitrary });
   };
