@@ -22,8 +22,8 @@ class SongResourceFinder {
     return await this.createResourceFromReadableStream(stream);
   };
 
-  private createResourceFromReadableStream = async (stream: ReadableStream) => {
-    const readableStream = Readable.fromWeb(stream, { highWaterMark: 1 });
+  private createResourceFromReadableStream = async (stream: ReadableStream<Uint8Array<ArrayBufferLike>>) => {
+    const readableStream = Readable.fromWeb(stream, { highWaterMark: 1, objectMode: false });
     const passThrough = new PassThrough({
       highWaterMark: 1,
       allowHalfOpen: true,
