@@ -1,4 +1,4 @@
-import { createAudioResource, demuxProbe } from '@discordjs/voice';
+import { createAudioResource, StreamType } from '@discordjs/voice';
 import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
@@ -40,9 +40,7 @@ class SongResourceFinder {
     readableStream.on('close', () => this.logger.error(`readableStream close`));
     readableStream.on('end', () => this.logger.error(`readableStream end`));
 
-    const { stream: discordStream, type } = await demuxProbe(passThroughStream);
-
-    return createAudioResource(discordStream, { inputType: type });
+    return createAudioResource(passThroughStream, { inputType: StreamType.Arbitrary });
   };
 }
 
