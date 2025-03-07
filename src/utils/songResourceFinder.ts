@@ -23,6 +23,15 @@ class SongResourceFinder {
   };
 
   private createResourceFromReadableStream = async (stream: ReadableStream) => {
+    stream
+      .getReader()
+      .closed.then(() => {
+        console.log('Поток закрыт');
+      })
+      .catch((err) => {
+        console.error('Ошибка при закрытии потока:', err);
+      });
+
     const readableStream = Readable.fromWeb(stream, { highWaterMark: 1 });
     const passThrough = new PassThrough({
       highWaterMark: 1,
