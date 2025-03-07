@@ -1,9 +1,9 @@
-import { createAudioResource } from '@discordjs/voice';
+import { createAudioResource, StreamType } from '@discordjs/voice';
+import { config } from '@utils/config';
 import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
 import { PassThrough, Readable } from 'stream';
-import { FFmpeg } from 'prism-media';
 
 class SongResourceFinder {
   private logger = new Logger('SongResourceFinder').childLogger;
@@ -24,40 +24,19 @@ class SongResourceFinder {
   };
 
   private createResourceFromReadableStream = async (stream: ReadableStream) => {
-    const transcoder = new FFmpeg({
-      args: [
-        '-loglevel',
-        'error',
-        '-analyzeduration',
-        '0',
-        '-loglevel',
-        '0',
-        '-f',
-        's16le',
-        '-ar',
-        '48000',
-        '-ac',
-        '2',
-        '-max_reload',
-        '10',
-        '-timeout',
-        '30000000',
-      ],
+    const readableStream = Readable.fromWeb(stream);
+    const passThrough = new PassThrough({
+      highWaterMark: config.chunkSize * 0.5,
+      allowHalfOpen: true,
+      autoDestroy: false,
+      decodeStrings: false,
     });
-    const readableStream = Readable.fromWeb(stream, {
-      highWaterMark: 1,
-      objectMode: false,
-    });
-    readableStream.pipe(transcoder).pipe(
-      new PassThrough({
-        highWaterMark: (96000 / 8) * 30,
-      }),
-    );
-    readableStream.on('close', () => this.logger.debug('Resource closed'));
-    readableStream.on('end', () => this.logger.debug('Resource end'));
-    readableStream.on('error', (e) => this.logger.debug(`Resource error ${e.message} ${e.stack}`));
 
-    return createAudioResource(readableStream);
+    readableStream.pipe(passThrough);
+
+    readableStream.on('error', (e) => this.logger.error(`${e.message} ${e.stack}`));
+
+    return createAudioResource(passThrough, { inputType: StreamType.Arbitrary });
   };
 }
 

@@ -24,19 +24,16 @@ import { Leave } from '@commands/leave';
 export class Player {
   private logger = new Logger('Player', this.server.guildId).childLogger;
   private static players = new Map<string, AudioPlayer>();
-  private readonly autoDisconnectTimeout = 5000; // 5min
-
-  private player: AudioPlayer;
+  private readonly autoDisconnectTimeout = 5000; // 5sec
 
   constructor(private server: Server) {}
 
   init = async (force?: boolean) => {
     const player = this.getPlayer();
     if (!player || force) {
-      this.player = await this.createPlayer();
+      await this.createPlayer();
       this.logger.debug(`Audio player not found but created`);
     } else {
-      this.player = player;
       this.logger.debug(`Audio player found`);
     }
   };
@@ -48,7 +45,7 @@ export class Player {
     const state = this.player.state as AudioPlayerPlayingState;
     if (!state.resource) return 0;
 
-    return Math.floor(state.resource.playbackDuration / 1000);
+    return Math.floor(state.playbackDuration / 1000);
   }
 
   start = async () => {
@@ -83,6 +80,14 @@ export class Player {
     Player.players.delete(this.server.guildId);
     this.logger.debug(`Player destroyed`);
   };
+
+  private get player() {
+    const player = this.getPlayer();
+    if (!player) {
+      throw new SGError('Player not found? Why?');
+    }
+    return player;
+  }
 
   private playSong = async (song: Song) => {
     try {
@@ -197,7 +202,6 @@ export class Player {
     voiceConnection.subscribe(audioPlayer);
     voiceConnection.configureNetworking();
     this.logger.debug(`Audio player created`);
-    return audioPlayer;
   };
 
   private sendAutoPlayMessage = async (server: Server) => {
