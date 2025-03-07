@@ -13,7 +13,8 @@ class Youtube {
     return this.innertube;
   }
 
-  getStream = (url: string) => this.innertube.download(url, { quality: '360p' });
+  getStream = (url: string) =>
+    this.innertube.download(url, { quality: '360p', range: { start: 0, end: config.chunkSize } });
 
   getFullUrl = (url: string) => {
     if (url.startsWith('https://www.youtube.com/shorts/')) {
