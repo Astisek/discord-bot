@@ -2,7 +2,7 @@ import { createAudioResource, StreamType } from '@discordjs/voice';
 import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
-import { PassThrough, Readable } from 'stream';
+import { Readable } from 'stream';
 
 class SongResourceFinder {
   private logger = new Logger('SongResourceFinder').childLogger;
@@ -24,25 +24,25 @@ class SongResourceFinder {
 
   private createResourceFromReadableStream = async (stream: ReadableStream<Uint8Array<ArrayBufferLike>>) => {
     const readableStream = Readable.fromWeb(stream);
-    const passThrough = new PassThrough({
-      highWaterMark: 1,
-      writableHighWaterMark: 1,
-      readableHighWaterMark: 1,
-      allowHalfOpen: true,
-      autoDestroy: false,
-      decodeStrings: false,
-    });
+    // const passThrough = new PassThrough({
+    //   highWaterMark: config.chunkSize,
+    //   writableHighWaterMark: config.chunkSize,
+    //   readableHighWaterMark: config.chunkSize,
+    //   allowHalfOpen: true,
+    //   autoDestroy: false,
+    //   decodeStrings: false,
+    // });
 
-    const passThroughStream = readableStream.pipe(passThrough);
+    // const passThroughStream = readableStream.pipe(passThrough);
 
-    passThrough.on('end', () => this.logger.error(`passThrough end`));
-    passThrough.on('close', () => this.logger.error(`passThrough close`));
-    passThrough.on('error', (e) => this.logger.error(`passThrough ${e.message} ${e.stack}`));
-    readableStream.on('error', (e) => this.logger.error(`readableStream ${e.message} ${e.stack}`));
-    readableStream.on('close', () => this.logger.error(`readableStream close`));
-    readableStream.on('end', () => this.logger.error(`readableStream end`));
+    // passThrough.on('end', () => this.logger.error(`passThrough end`));
+    // passThrough.on('close', () => this.logger.error(`passThrough close`));
+    // passThrough.on('error', (e) => this.logger.error(`passThrough ${e.message} ${e.stack}`));
+    // readableStream.on('error', (e) => this.logger.error(`readableStream ${e.message} ${e.stack}`));
+    // readableStream.on('close', () => this.logger.error(`readableStream close`));
+    // readableStream.on('end', () => this.logger.error(`readableStream end`));
 
-    return createAudioResource(passThroughStream, { inputType: StreamType.Arbitrary });
+    return createAudioResource(readableStream, { inputType: StreamType.Arbitrary });
   };
 }
 
