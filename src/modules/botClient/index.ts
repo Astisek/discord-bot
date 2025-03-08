@@ -101,7 +101,7 @@ class BotClient {
 
       this.logger.info(`Successfully reloaded ${data.length} application (/) commands.`);
     } catch (error) {
-      console.error(error);
+      this.logger.error(error);
     }
   }
 }

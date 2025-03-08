@@ -21,12 +21,8 @@ class Config {
     return process.env.IS_DEV === 'true';
   }
 
-  get chunkSize() {
-    return +process.env.CHUNK_SIZE;
-  }
-
-  get waterMarkSize() {
-    return +process.env.WATER_MARK;
+  get highWaterMark() {
+    return +process.env.HIGH_WATER_MARK;
   }
 
   get database() {

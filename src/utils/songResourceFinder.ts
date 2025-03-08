@@ -24,7 +24,7 @@ class SongResourceFinder {
   };
 
   private createResourceFromReadableStream = async (stream: ReadableStream<Uint8Array<ArrayBufferLike>>) => {
-    const readableStream = Readable.fromWeb(stream, { highWaterMark: config.chunkSize });
+    const readableStream = Readable.fromWeb(stream, { highWaterMark: config.highWaterMark });
 
     readableStream.on('error', (e) => this.logger.error(`readableStream ${e.message} ${e.stack}`));
 
