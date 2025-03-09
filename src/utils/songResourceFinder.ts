@@ -1,5 +1,4 @@
 import { createAudioResource, StreamType } from '@discordjs/voice';
-import { config } from '@utils/config';
 import { Logger } from '@utils/logger';
 import { SGError } from '@utils/SGError';
 import { youtube } from '@utils/youtube';
@@ -24,7 +23,7 @@ class SongResourceFinder {
   };
 
   private createResourceFromReadableStream = async (stream: ReadableStream<Uint8Array<ArrayBufferLike>>) => {
-    const readableStream = Readable.fromWeb(stream, { highWaterMark: config.highWaterMark });
+    const readableStream = Readable.fromWeb(stream);
 
     readableStream.on('error', (e) => this.logger.error(`readableStream ${e.message} ${e.stack}`));
 
