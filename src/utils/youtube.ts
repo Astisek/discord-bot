@@ -13,7 +13,7 @@ class Youtube {
     return this.innertube;
   }
 
-  getStream = (url: string) => this.innertube.download(url);
+  getStream = (url: string) => this.innertube.download(url, { type: 'audio' });
 
   getFullUrl = (url: string) => {
     if (url.startsWith('https://www.youtube.com/shorts/')) {

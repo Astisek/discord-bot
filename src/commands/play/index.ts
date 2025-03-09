@@ -78,12 +78,13 @@ export class Play implements Command {
         }
       }
       // Attachment song
-      if (this.attachment) {
+      else if (this.attachment) {
         await playUtils.playCustom(this.attachment, this.server, this.guildMember);
         this.logger.debug(`Single custom songs added`);
-        return this.createCustomEmbed();
+        this.createCustomEmbed();
+      } else {
+        throw new SGError('Resource not found');
       }
-      throw new SGError('Resource not found');
     } catch (e) {
       this.logger.debug(e);
       throw new SGError('Invalid arguments');
