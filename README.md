@@ -36,9 +36,9 @@ Install link: https://discord.com/oauth2/authorize?client_id=727482461977575424&
 |PGADMIN_DEFAULT_PASSWORD||Password for logging into pgAdmin|
 
 ### Requirements
-**Nodejs**: 22.14.0 or above
-**Python**: 2.7
-**ffmpeg**: any
+**Nodejs**: 22.14.0 or above  
+**Python**: 2.7  
+**ffmpeg**: any  
 
 ### Development
 1. Run `docker-compose up -d` in `local-database` directory
