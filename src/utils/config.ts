@@ -21,10 +21,6 @@ class Config {
     return process.env.IS_DEV === 'true';
   }
 
-  get highWaterMark() {
-    return +process.env.HIGH_WATER_MARK;
-  }
-
   get database() {
     return {
       userName: process.env.DATABASE_USERNAME,

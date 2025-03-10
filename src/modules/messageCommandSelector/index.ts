@@ -19,7 +19,7 @@ export class MessageCommandSelector {
       return;
     }
     this.logger.debug('Command detected');
-    const loadingMessage = await message.channel.send({ content: '<a:loading_aaa:1344667013976428596> Loading...' });
+    const loadingMessage = await message.channel.send({ content: '<a:loading_aaa:1348205846571647017> Loading...' });
 
     try {
       const [commandWithPrefix, ...args] = message.content.split(' ');
@@ -44,7 +44,7 @@ export class MessageCommandSelector {
       this.logger.debug('Command action complete');
 
       this.logger.debug('Try successContent...');
-      const successContent = await commandAction?.successContent?.();
+      const successContent = await commandAction.successContent();
       if (successContent) {
         await loadingMessage.edit({
           content: '',

@@ -12,7 +12,6 @@ declare global {
       DATABASE_PORT: string;
       DATABASE_NAME: string;
       YT_COOKIE: string;
-      HIGH_WATER_MARK: string;
     }
   }
 }

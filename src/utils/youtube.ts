@@ -24,12 +24,15 @@ class Youtube {
     }
     return url;
   };
+
   getYoutubeUrlFromId = (videoId: string) => `https://www.youtube.com/watch?v=${videoId}`;
+
   getVideoId = (url: string) => {
     const fullUrl = this.getFullUrl(url);
     const searchParams = this.urlParams(fullUrl);
     return searchParams.get('v') || '';
   };
+
   getPlaylistId = (url: string) => {
     const fullUrl = this.getFullUrl(url);
     const searchParams = this.urlParams(fullUrl);
