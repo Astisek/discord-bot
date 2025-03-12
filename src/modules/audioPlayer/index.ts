@@ -134,6 +134,10 @@ export class Player {
       entersState(voiceConnection, VoiceConnectionStatus.Ready, 30e3);
       const lastSong = server.songs?.[0];
       const nextSong = server.songs?.[1];
+      if (server.isRepeat) {
+        return this.playSong(lastSong);
+      }
+
       if (lastSong) {
         await database.removeSong(lastSong.id, server.guildId);
       }

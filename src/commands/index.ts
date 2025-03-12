@@ -10,5 +10,6 @@ import { Prefix } from '@commands/prefix';
 import { Pause } from '@commands/pause';
 import { Resume } from '@commands/resume';
 import { Autoplay } from '@commands/autoplay';
+import { Repeat } from '@commands/repeat';
 
-export { Join, Leave, Play, Skip, NowPlaying, Clear, Queue, Move, Prefix, Pause, Resume, Autoplay };
+export { Join, Leave, Play, Skip, NowPlaying, Clear, Queue, Move, Prefix, Pause, Resume, Autoplay, Repeat };

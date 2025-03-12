@@ -26,6 +26,9 @@ export class Server {
   @Column('boolean', { default: false })
   isAutoplay: boolean;
 
+  @Column('boolean', { default: false })
+  isRepeat: boolean;
+
   @CreateDateColumn()
   created_at?: Date;
 
