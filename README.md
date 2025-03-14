@@ -1,6 +1,6 @@
 # Discord bot
 
-Install link: https://discord.com/oauth2/authorize?client_id=727482461977575424&permissions=8&integration_type=0&scope=bot
+Invite link: https://discord.com/oauth2/authorize?client_id=727482461977575424&permissions=8&integration_type=0&scope=bot
 
 ## Available commands
 1. **Join** - join in voice channel
